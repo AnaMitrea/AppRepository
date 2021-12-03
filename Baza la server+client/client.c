@@ -1,8 +1,3 @@
-/* cliTCPIt.c - Exemplu de client TCP
-   Trimite un nume la server; primeste de la server "Hello nume".
-         
-   Autor: Lenuta Alboaie  <adria@infoiasi.ro> (c)2009
-*/
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -14,11 +9,9 @@
 #include <netdb.h>
 #include <string.h>
 
-/* codul de eroare returnat de anumite apeluri */
-extern int errno;
+extern int errno; //codul de eroare returnat de anumite apeluri
 
-/* portul de conectare la server*/
-int port;
+int port; // portul de conectare la server
 
 int main (int argc, char *argv[])
 {
@@ -58,31 +51,74 @@ int main (int argc, char *argv[])
       return errno;
     }
 
+  printf("\n");
+  printf("Available commands on the server: \n");
+  printf("[1] To insert your Application, please write \"Insert\". \n");
+  printf("[2] To search an Application, please write \"Search\". \n");
+  printf("[3] To Disconnect from the server, please write \"Disconnect\" \n");
+  printf("\n");
+
   while(1)
   {
     /* citirea mesajului */
     bzero (msg, 100);
-    printf ("[client]Introduceti un nume: ");
+    printf ("[client] Write your command: ");
     fflush (stdout);
     read (0, msg, 100);
 
-    /* trimiterea mesajului la server */
-    if (write (sd, msg, 100) <= 0)
+    msg[strlen(msg)-1]='\0';
+
+    if(strcmp(msg,"Disconnect") == 0)
+    {
+        /* trimiterea mesajului la server */
+      if (write (sd, "Disconnect", strlen("Disconnect")) <= 0)
       {
-        perror ("[client]Eroare la write() spre server.\n");
+        perror ("[client] Error at writting message for server.\n");
         return errno;
       }
 
-    /* citirea raspunsului dat de server 
-        (apel blocant pina cind serverul raspunde) */
-    if (read (sd, msg, 100) < 0)
+      printf("You have disconnected from the server...\n");
+      break;
+    }
+    else
+    if(strcmp(msg,"Insert") == 0)
+    {
+      if (write (sd, "Insert", strlen("Insert")) <= 0)
       {
-        perror ("[client]Eroare la read() de la server.\n");
+        perror ("[client] Error at writting message for server.\n");
         return errno;
       }
+    }
+    else
+    if(strcmp(msg,"Search") == 0)
+    {
+      if (write (sd, "Search", strlen("Search")) <= 0)
+      {
+        perror ("[client] Error at writting message for server.\n");
+        return errno;
+      }
+    }
+    else
+    {
+        printf("%s is an unavailable command. \n", msg);
+        printf("Available commands on the server: \n");
+        printf("[1] To insert your Application, please write \"Insert\". \n");
+        printf("[2] To search an Application, please write \"Search\". \n");
+        printf("[3] To Disconnect from the server, please write \"Disconnect\" \n");
+        printf("\n");
+    }
+
+
+    /* citirea raspunsului dat de server (apel blocant pana cand serverul raspunde) */
+    if (read (sd, msg, 100) < 0)
+    {
+      perror ("[client] Error at reading message from server.\n");
+      return errno;
+    }
+
     /* afisam mesajul primit */
-    printf ("[client]Mesajul primit este: %s\n", msg);
-        
+    printf ("[client] Message: \n * %s\n", msg);
+
   }
 
   /* inchidem conexiunea, am terminat */
