@@ -7,32 +7,32 @@
 #include <string.h>
 #include <stdlib.h>
 #include <signal.h>
-/* portul folosit */
+
 #define PORT 2024
 
-/* codul de eroare returnat de anumite apeluri */
-extern int errno;
+extern int errno; // codul de eroare returnat de anumite apeluri
 
 void sighandler()
 {
   while(waitpid(-1, NULL, WNOHANG) > 0);
 }
 
-
 int main ()
 {
   struct sockaddr_in server;	// structura folosita de server
   struct sockaddr_in from;	
-  char msg[100];		//mesajul primit de la client 
-  char msgrasp[100]=" ";        //mesaj de raspuns pentru client
   int sd;			//descriptorul de socket 
+
+  /*
+  char command[100];		//mesajul primit de la client 
+  char information[100]=" ";        //mesaj de raspuns pentru client
+  */
 
   if (signal (SIGCHLD, sighandler) == SIG_ERR)
   {
     perror ("signal()");
     return 1;
   }
-
 
   /* crearea unui socket */
   if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1)
@@ -69,72 +69,131 @@ int main ()
 
   /* servim in mod iterativ clientii... */
   while (1)
+  {
+    int client;
+    int length = sizeof (from);
+
+    printf ("[server] Asteptam la portul %d...\n",PORT);
+    fflush (stdout);
+
+    /* acceptam un client (stare blocanta pina la realizarea conexiunii) */
+    client = accept (sd, (struct sockaddr *) &from, &length);
+
+    /* eroare la acceptarea conexiunii de la un client */
+    if (client < 0)
     {
-      int client;
-      int length = sizeof (from);
-
-      printf ("[server]Asteptam la portul %d...\n",PORT);
-      fflush (stdout);
-
-      /* acceptam un client (stare blocanta pina la realizarea conexiunii) */
-      client = accept (sd, (struct sockaddr *) &from, &length);
-
-      /* eroare la acceptarea conexiunii de la un client */
-      if (client < 0)
-      {
-        perror ("[server]Eroare la accept().\n");
-        continue;
-      }
+      perror ("[server] Eroare la accept().\n");
+      continue;
+    }
 
 
     if(fork() == 0)
     {
       close(sd);
+      char command[100];
 
       while(1)
       {
-      /* s-a realizat conexiunea, se astepta mesajul */
-      bzero (msg, 100);
-      printf ("[server]Asteptam mesajul...\n");
-      fflush (stdout);
-      
-      /* citirea mesajului */
-      if (read (client, msg, 100) <= 0)
-      {
-        perror ("[server]Eroare la read() de la client.\n");
-        close (client);	/* inchidem conexiunea cu clientul */
-        continue;		/* continuam sa ascultam */
-      }
-	
-      printf ("[server]Mesajul a fost receptionat...%s\n", msg);
-      
-      /*pregatim mesajul de raspuns */
-      bzero(msgrasp,100);
-      strcat(msgrasp,"Hello ");
-      strcat(msgrasp,msg);
-      
-      printf("[server]Trimitem mesajul inapoi...%s\n",msgrasp);
-      
-      
-      /* returnam mesajul clientului */
-      if (write (client, msgrasp, 100) <= 0)
-      {
-        perror ("[server]Eroare la write() catre client.\n");
-        continue;		/* continuam sa ascultam */
-      }
-      else
-	    printf ("[server]Mesajul a fost trasmis cu succes.\n");
+        /* s-a realizat conexiunea, se astepta mesajul */
+        bzero (command, 100);
+        printf ("[server] Waiting client to write command...\n");
+        fflush (stdout);
+        
+        /* Citire bytes si comanda de la client*/
+        int bytes_sent;  //bytes trimisi de client
+        if (read (client, &bytes_sent, sizeof(int)) < 0) 
+        {
+            perror ("[server] Error at reading num bytes from client.\n");
+            close(client); /* inchidem conexiunea cu clientul */
+            break;  /* continuam sa ascultam */
+        }
 
+        sleep(1);
 
-      // daca am comanda disconnect trebuie sa ies din bucla
+        if (read (client, command, bytes_sent) < 0)
+        {
+            perror ("[server] Error at reading command from client.\n");
+            close(client);  /* inchidem conexiunea cu clientul */
+            break;  /* continuam sa ascultam */
+        }
+        
+        command[strlen(command)] = '\0';
+        printf ("[server] Bytes received: %d and Command received...%s\n", bytes_sent, command);
+        
 
+        /*pregatim mesajul de raspuns */
+        if(strcmp(command,"Disconnect") == 0)
+        {
+          printf ("[server] A client has disconnected from server. \n");
+          close (client); /* inchidem conexiunea cu clientul */
+          exit(1);
+        }
+        else
+        if(strcmp(command,"Insert") == 0)
+        {
+          printf ("[server] Client wants to add an app. \n");
+
+          char information[100];
+          bzero(information,100);
+          strcpy(information, "Application has been added successfully.");
+
+          printf ("[server] Sending back information... \n");
+
+          int bytes = strlen(information) + 1;  // bytes de trimis la client
+
+          if (write (client, &bytes, sizeof(int)) <= 0)
+          {
+              perror ("[server] Error at writting num bytes for client.\n");
+              break; /* continuam sa ascultam */
+          }
+
+          sleep(1);
+
+          // trimitere comanda la server
+          if (write (client, information, bytes) <= 0)
+          {
+              perror ("[server] Error at writting command for client.\n");
+              break; /* continuam sa ascultam */
+          }
+          else
+              printf("[server] Client has received the message.\n\n");
+        }
+        else
+        if(strcmp(command,"Search") == 0)
+        {
+          printf ("[server] Client wants to add an app. \n");
+
+          char information[100];
+          bzero(information,100);
+          strcpy(information, "Applications have been found.");
+
+          printf ("[server] Sending back information... \n");
+
+          int bytes = strlen(information) + 1;  // bytes de trimis la client
+
+          if (write (client, &bytes, sizeof(int)) <= 0)
+          {
+              perror ("[server] Error at writting num bytes for client.\n");
+              break; /* continuam sa ascultam */
+          }
+
+          sleep(1);
+
+          // trimitere comanda la server
+          if (write (client, information, bytes) <= 0)
+          {
+              perror ("[server] Error at writting command for client.\n");
+              break; /* continuam sa ascultam */
+          }
+          else
+              printf("[server] Client has received the message.\n\n");
+        }
       }
       /* am terminat cu acest client, inchidem conexiunea */
       close (client);
       exit(1);
     }
     close(client);
+    }
 
-
-    }				/* while */
-}				/* main */
+}

@@ -60,19 +60,20 @@ int main (int argc, char *argv[])
 
   while(1)
   {
+    int ok = 1;
     /* Citire comanda introdusa */
     bzero (command, 100);
     printf ("[client] Write your command: ");
     fflush (stdout);
     read (0, command, 100);
 
-    command[strlen(command)-1]='\0';
+    command[strlen(command) - 1] = '\0';
 
     // Trimitere comanda introdusa catre server
     if(strcmp(command,"Disconnect") == 0)
     {
       /// trimitere bytes la server 
-      int bytes = strlen("Disconnect");
+      int bytes = strlen("Disconnect") + 1;
 
       if (write (sd, &bytes, sizeof(int)) <= 0)
       {
@@ -98,7 +99,7 @@ int main (int argc, char *argv[])
     if(strcmp(command,"Insert") == 0)
     {
       // trimitere bytes la server
-      int bytes = strlen("Insert");
+      int bytes = strlen("Insert") + 1;
 
       if (write (sd, &bytes, sizeof(int)) <= 0)
       {
@@ -119,7 +120,7 @@ int main (int argc, char *argv[])
     if(strcmp(command,"Search") == 0)
     {
       // trimitere bytes la server
-      int bytes = strlen("Search");
+      int bytes = strlen("Search") + 1;
 
       if (write (sd, &bytes, sizeof(int)) <= 0)
       {
@@ -137,37 +138,41 @@ int main (int argc, char *argv[])
     }
     else
     {
-        printf("%s is an unavailable command. \n", command);
+        printf("\n%s is an unavailable command. \n", command);
         printf("Available commands on the server: \n");
         printf("[1] To insert your Application, please write \"Insert\". \n");
         printf("[2] To search an Application, please write \"Search\". \n");
         printf("[3] To Disconnect from the server, please write \"Disconnect\" \n");
         printf("\n");
+        ok = 0;
     }
 
-    int bytes_sent;
-    
-    /* citirea raspunsului dat de server (apel blocant pana cand serverul raspunde) */
-    if (read (sd, &bytes_sent, sizeof(int)) < 0)
+    if(ok == 1)
     {
-      perror ("[client] Error at reading num bytes from server.\n");
-      return errno;
+      int bytes_sent;
+      /* citirea raspunsului dat de server (apel blocant pana cand serverul raspunde) */
+      if (read (sd, &bytes_sent, sizeof(int)) < 0)
+      {
+        perror ("[client] Error at reading num bytes from server.\n");
+        return errno;
+      }
+
+      sleep(1);
+
+      char information[bytes_sent];
+      bzero(information, bytes_sent);
+
+      if (read (sd, information, bytes_sent) < 0)
+      {
+        perror ("[client] Error at reading message from server.\n");
+        return errno;
+      }
+
+      information[strlen(information)] = '\0';
+
+      /* afisam mesajul primit */
+      printf("[client] num bytes: %d\n", bytes_sent);
+      printf ("[client] Message: \n%s\n", information);
     }
-
-    sleep(1);
-
-    char information[bytes_sent];
-
-    if (read (sd, information, bytes_sent) < 0)
-    {
-      perror ("[client] Error at reading message from server.\n");
-      return errno;
-    }
-
-    information[strlen(information) - 1] = '\0';
-
-    /* afisam mesajul primit */
-    printf ("[client] Message: \n * %s\n", information);
-
   }
 }
