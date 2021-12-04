@@ -23,11 +23,6 @@ int main ()
   struct sockaddr_in from;	
   int sd;			//descriptorul de socket 
 
-  /*
-  char command[100];		//mesajul primit de la client 
-  char information[100]=" ";        //mesaj de raspuns pentru client
-  */
-
   if (signal (SIGCHLD, sighandler) == SIG_ERR)
   {
     perror ("signal()");
@@ -67,7 +62,7 @@ int main ()
       return errno;
     }
 
-  /* servim in mod iterativ clientii... */
+  /* servim in mod concurent clientii... */
   while (1)
   {
     int client;
@@ -76,7 +71,7 @@ int main ()
     printf ("[server] Asteptam la portul %d...\n",PORT);
     fflush (stdout);
 
-    /* acceptam un client (stare blocanta pina la realizarea conexiunii) */
+    /* acceptam un client (stare blocanta pana la realizarea conexiunii) */
     client = accept (sd, (struct sockaddr *) &from, &length);
 
     /* eroare la acceptarea conexiunii de la un client */
@@ -87,7 +82,7 @@ int main ()
     }
 
 
-    if(fork() == 0)
+    if(fork() == 0)  // child process
     {
       close(sd);
       char command[100];
@@ -98,7 +93,7 @@ int main ()
         bzero (command, 100);
         printf ("[server] Waiting client to write command...\n");
         fflush (stdout);
-        
+
         /* Citire bytes si comanda de la client*/
         int bytes_sent;  //bytes trimisi de client
         if (read (client, &bytes_sent, sizeof(int)) < 0) 
@@ -118,7 +113,7 @@ int main ()
         }
         
         command[strlen(command)] = '\0';
-        printf ("[server] Bytes received: %d and Command received...%s\n", bytes_sent, command);
+        printf ("[server] Bytes: %d , Command: \"%s\"\n", bytes_sent, command);
         
 
         /*pregatim mesajul de raspuns */
@@ -193,7 +188,7 @@ int main ()
       close (client);
       exit(1);
     }
+    // parent process or error at fork() :
     close(client);
     }
-
 }
