@@ -103,8 +103,6 @@ int main ()
             break;  /* continuam sa ascultam */
         }
 
-        sleep(1);
-
         if (read (client, command, bytes_sent) < 0)
         {
             perror ("[server] Error at reading command from client.\n");
@@ -130,7 +128,7 @@ int main ()
 
           char information[100];
           bzero(information,100);
-          strcpy(information, "Application has been added successfully.");
+          strcpy(information, "[testing] Application has been added successfully.");
 
           printf ("[server] Sending back information... \n");
 
@@ -141,8 +139,6 @@ int main ()
               perror ("[server] Error at writting num bytes for client.\n");
               break; /* continuam sa ascultam */
           }
-
-          sleep(1);
 
           // trimitere comanda la server
           if (write (client, information, bytes) <= 0)
@@ -160,7 +156,7 @@ int main ()
 
           char information[100];
           bzero(information,100);
-          strcpy(information, "Applications have been found.");
+          strcpy(information, "[testing] Applications have been found.");
 
           printf ("[server] Sending back information... \n");
 
@@ -171,8 +167,6 @@ int main ()
               perror ("[server] Error at writting num bytes for client.\n");
               break; /* continuam sa ascultam */
           }
-
-          sleep(1);
 
           // trimitere comanda la server
           if (write (client, information, bytes) <= 0)

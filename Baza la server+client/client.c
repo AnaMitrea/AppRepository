@@ -81,8 +81,6 @@ int main (int argc, char *argv[])
           return errno;
       }
 
-      sleep(1);
-
       // trimitere comanda la server
       if (write (sd, command, bytes) <= 0)
       {
@@ -107,8 +105,6 @@ int main (int argc, char *argv[])
           return errno;
       }
 
-      sleep(1);
-
       // trimitere comanda catre server
       if (write (sd, command, bytes) <= 0)
       {
@@ -128,7 +124,6 @@ int main (int argc, char *argv[])
           return errno;
       }
 
-      sleep(1);
 
       if (write (sd, command, bytes) <= 0)
       {
@@ -156,8 +151,6 @@ int main (int argc, char *argv[])
         perror ("[client] Error at reading num bytes from server.\n");
         return errno;
       }
-
-      sleep(1);
 
       char information[bytes_sent];
       bzero(information, bytes_sent);
