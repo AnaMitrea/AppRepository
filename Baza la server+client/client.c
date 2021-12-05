@@ -171,8 +171,7 @@ int main (int argc, char *argv[])
       information[strlen(information)] = '\0';
 
       /* afisam mesajul primit */
-      printf("[client] num bytes: %d\n", bytes_sent);
-      printf ("[client] Message: \n%s\n", information);
+      printf ("[client] %s\n", information);
     }
   }
 }

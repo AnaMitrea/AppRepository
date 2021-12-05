@@ -113,7 +113,7 @@ int main ()
         }
         
         command[strlen(command)] = '\0';
-        printf ("[server] Bytes: %d , Command: \"%s\"\n", bytes_sent, command);
+        printf ("[server] Command sent by client: \"%s\"\n", command);
         
 
         /*pregatim mesajul de raspuns */
