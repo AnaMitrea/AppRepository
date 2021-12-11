@@ -9,8 +9,17 @@
 #include <signal.h>
 
 #define PORT 2024
-
+#define MAXIMUM 1024
 extern int errno; // codul de eroare returnat de anumite apeluri
+
+extern int errorHandling(char* errmsg);
+void sighandler();
+
+extern int errorHandling(char* errmsg)
+{
+  perror(errmsg);
+  return errno;
+}
 
 void sighandler()
 {
@@ -31,10 +40,9 @@ int main ()
 
   /* crearea unui socket */
   if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1)
-    {
-      perror ("[server]Eroare la socket().\n");
-      return errno;
-    }
+  {
+    errorHandling("[server]Eroare la socket().\n");
+  }
 
   /* pregatirea structurilor de date */
   bzero (&server, sizeof (server));
@@ -50,17 +58,15 @@ int main ()
   
   /* atasam socketul */
   if (bind (sd, (struct sockaddr *) &server, sizeof (struct sockaddr)) == -1)
-    {
-      perror ("[server]Eroare la bind().\n");
-      return errno;
-    }
+  {
+    errorHandling("[server]Eroare la bind().\n");
+  }
 
   /* punem serverul sa asculte daca vin clienti sa se conecteze */
   if (listen (sd, 5) == -1)
-    {
-      perror ("[server]Eroare la listen().\n");
-      return errno;
-    }
+  {
+    errorHandling("[server]Eroare la listen().\n");
+  }
 
   /* servim in mod concurent clientii... */
   while (1)
@@ -81,16 +87,15 @@ int main ()
       continue;
     }
 
-
     if(fork() == 0)  // child process
     {
       close(sd);
-      char command[100];
+      char command[MAXIMUM];
 
       while(1)
       {
         /* s-a realizat conexiunea, se astepta mesajul */
-        bzero (command, 100);
+        bzero (command, MAXIMUM);
         printf ("[server] Waiting client to write command...\n");
         fflush (stdout);
 
