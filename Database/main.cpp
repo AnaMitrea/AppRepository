@@ -10,6 +10,7 @@
 #include <sqlite3.h>
 #include <iostream>
 #include <string>
+#include <algorithm>
 using namespace std;
 #define maxi 1024
 
@@ -171,32 +172,6 @@ string insertValues_Application()
     return insertInfo;
 }
 
-string insertValues_OS()
-{
-    string cinBuffer; // reading from stdin
-    string searchInfo; // holds information about sql query for searching db with a criteria
-    string insertInfo; // holds information about sql query for inserting in db
-
-    cout << "Operating System details:\n";
-    cout << "For multiple distros, write \",\" between them.\n";
-    searchInfo.clear();
-
-    cout << "OS distribution: "; 
-    getline(cin, cinBuffer);
-
-    if(cinBuffer.empty() == 1)
-    {
-        insertInfo = insertInfo + "\"-\"";
-    }
-    else
-    {
-        insertInfo = insertInfo + "\""+ cinBuffer + "\"";
-    }
-    cinBuffer.clear();
-
-    return insertInfo;
-}
-
 string insertValues_Minimum_Req()
 {
     string cinBuffer; // reading from stdin
@@ -332,7 +307,7 @@ void selectQuery(sqlite3* db, string select_data)
     }
 }
 
-int getAppID(sqlite3* db, string appName) 
+string getAppID(sqlite3* db, string appName) 
 {
     char* SQL_errorMessage; // error message from sql query
     char data[maxi]; // callback argument
@@ -356,7 +331,7 @@ int getAppID(sqlite3* db, string appName)
         sqlQueryResult = data;
 
         int position = sqlQueryResult.find("=");
-        int appID = stoi(sqlQueryResult.substr(position + 1, sqlQueryResult.length() - position));
+        string appID =sqlQueryResult.substr(position + 1, sqlQueryResult.length() - position);
 
         return appID;
     }
@@ -400,34 +375,69 @@ int main(int argc, char* argv[])
         sqlQuery.clear();
 
         int secondposition = insertInfo.find("\"", 1); 
-        cout << "A doua pozitie: " << secondposition << endl;
         string appName = insertInfo.substr(1,secondposition-1);
-        int appID = getAppID(db, appName);
+        string appID = getAppID(db, appName);
+        insertInfo.clear();
 
-        cout << "ID-ul aplicatiei " << appName << " este " << appID << endl;
+        // inserare in OS table
+        cout << "Operating System details:\n";
+        cinBuffer.clear();
 
-                
-        insertInfo = insertValues_OS();
-        sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES(\""+ to_string(appID) + "\", " + insertInfo + ");";
+        cout << "OS distribution: "; 
+        getline(cin, cinBuffer);
 
-        cout << sqlQuery << endl;
+        if(cinBuffer.empty() == 1)
+        {
+            insertInfo = insertInfo + "\"-\"";
+        }
+        else
+        {
+            insertInfo = insertInfo + "\""+ cinBuffer + "\"";
+        }
 
-
+        sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + ", " + insertInfo + ");";
         insertQuery(db, sqlQuery);
-        
-/*
+        sqlQuery.clear();
+        insertInfo.clear();
+
+
+        cout << "If you want to add more distributions, write ADD. If you don't want to, write STOP.\n";
+        cinBuffer.clear();
+        getline(cin, cinBuffer);
+        while(cinBuffer != "STOP")
+        {
+            cout << "OS distribution: "; 
+            getline(cin, cinBuffer);
+
+            if(cinBuffer.empty() == 1)
+            {
+                insertInfo = insertInfo + "\"-\"";
+            }
+            else
+            {
+                insertInfo = insertInfo + "\""+ cinBuffer + "\"";
+            }
+
+            sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + ", " + insertInfo + ");";
+            insertQuery(db, sqlQuery);
+
+            cinBuffer.clear();
+            insertInfo.clear();
+            cout << "If you want to add more distributions, write ADD. If you don't want to, write STOP.\n";
+            getline(cin, cinBuffer);
+        } 
+
+        cinBuffer.clear();
+        sqlQuery.clear();
+        insertInfo.clear();
+
+        // Inserare in Minimum_req Table
         insertInfo = insertValues_Minimum_Req();
-        //string appName;
-        // int id = to_string(getID(appName));
-        sqlQuery = "INSERT INTO Minimum_Req(AppID,GHzCPU, GPU, GB_RAM, GB_HDStorage) VALUES(" + insertInfo + ");";
+        sqlQuery = "INSERT INTO Minimum_Req(AppID,GHzCPU, GPU, GB_RAM, GB_HDStorage) VALUES(" + appID + "," +insertInfo + ");";
 
         cout << sqlQuery << endl;
+        insertQuery(db, sqlQuery);
 
-        // de aflat id ul anterior
-
-        //insertQuery(sqlQuery, db);
-        // to do - cere inf despre celelalte 2 tabele si adauga 2 insert
-*/
     }
     else
     if(inputCommand == "Search")          // cautare in db
