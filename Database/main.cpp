@@ -40,7 +40,7 @@ static int callback(void* data, int argc, char** argv, char** azColName) //calba
     return 0;
 }
 
-void insertQuery(sqlite3* db, string sqlQuery)
+string insertQuery(sqlite3* db, string sqlQuery)
 {
     char* SQL_errorMessage; // error message from sql query
     char data[maxi]; // callback argument
@@ -52,14 +52,12 @@ void insertQuery(sqlite3* db, string sqlQuery)
     if (sqlExec != SQLITE_OK)
     {
         sqlQueryResult = SQL_errorMessage;
-        cout << sqlQueryResult;
         sqlite3_free (SQL_errorMessage);
+        return sqlQueryResult;
     }
     else
     {
-        data[strlen(data) - 1]=0;
-        sqlQueryResult = data;
-        cout << sqlQueryResult;
+        return "OK at inserting query";
     }
 }
 
@@ -283,7 +281,6 @@ string insertValues_Minimum_Req()
     return insertInfo;
 }
 
-
 void selectQuery(sqlite3* db, string select_data)
 {
     char* SQL_errorMessage;
@@ -357,9 +354,11 @@ int main(int argc, char* argv[])
     string searchInfo; // sql query for searching db with a criteria
     string insertInfo; // sql query for inserting in db
     string sqlQuery; // sql query to be executed
+    string sqlResponse; // sql query response
 
     cout << "[1] To insert your Application, write \"Insert\". \n";
     cout << "[2] To search an Application, write \"Search\". \n";
+    cout << "Your command: ";
 
     string inputCommand;
     cin >> inputCommand;
@@ -371,7 +370,9 @@ int main(int argc, char* argv[])
         sqlQuery.clear();
 
         sqlQuery = "INSERT INTO Application(AppName, Developer, Executable_name, License, Category, InternetConnection, AppInfo) VALUES(" + insertInfo + ");";
-        insertQuery(db, sqlQuery);
+        sqlResponse = insertQuery(db, sqlQuery);
+        cout << sqlResponse << endl;
+        sqlResponse.clear();
         sqlQuery.clear();
 
         int secondposition = insertInfo.find("\"", 1); 
@@ -396,7 +397,9 @@ int main(int argc, char* argv[])
         }
 
         sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + ", " + insertInfo + ");";
-        insertQuery(db, sqlQuery);
+        sqlResponse = insertQuery(db, sqlQuery);
+        cout << sqlResponse << endl;
+        sqlResponse.clear();
         sqlQuery.clear();
         insertInfo.clear();
 
@@ -419,7 +422,9 @@ int main(int argc, char* argv[])
             }
 
             sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + ", " + insertInfo + ");";
-            insertQuery(db, sqlQuery);
+            sqlResponse = insertQuery(db, sqlQuery);
+            cout << sqlResponse << endl;
+            sqlResponse.clear();
 
             cinBuffer.clear();
             insertInfo.clear();
@@ -435,8 +440,9 @@ int main(int argc, char* argv[])
         insertInfo = insertValues_Minimum_Req();
         sqlQuery = "INSERT INTO Minimum_Req(AppID,GHzCPU, GPU, GB_RAM, GB_HDStorage) VALUES(" + appID + "," +insertInfo + ");";
 
-        cout << sqlQuery << endl;
-        insertQuery(db, sqlQuery);
+        sqlResponse = insertQuery(db, sqlQuery);
+        cout << sqlResponse << endl;
+        sqlResponse.clear();
 
     }
     else
