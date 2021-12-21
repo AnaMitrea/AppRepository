@@ -87,13 +87,9 @@ string insertQuery(sqlite3* db, string sqlQuery)
 string insertValues_Application()
 {
     string cinBuffer; // reading from stdin
-    string searchInfo; // holds information about sql query for searching db with a criteria
     string insertInfo; // holds information about sql query for inserting in db
 
-
     cout << "Complete the following information about your application.\n";
-    searchInfo.clear();
-
     cout << "Project Name: "; 
     getline(cin, cinBuffer);
     
@@ -103,7 +99,6 @@ string insertValues_Application()
         cout << "Project Name: "; 
         getline(cin, cinBuffer);
     }
-
     insertInfo = insertInfo + "\""+ cinBuffer + "\"";
 
     // DEVELOPER
@@ -111,28 +106,26 @@ string insertValues_Application()
     cout << "Developer: "; 
     getline(cin, cinBuffer);
 
-    if(cinBuffer.empty() == 1)
+    while(cinBuffer.empty() == 1)
     {
-        insertInfo = insertInfo + ",\"-\"";
+        cout << "Developer's Name field must be completed!" << endl;
+        cout << "Developer: ";
+        getline(cin, cinBuffer);
     }
-    else
-    {
-        insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
-    }
+    insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
 
     // EXECUTABLE NAME
     cinBuffer.clear(); //reset string
     cout << "Executable: "; 
     getline(cin, cinBuffer);
 
-    if(cinBuffer.empty() == 1)
+    while(cinBuffer.empty() == 1)
     {
-        insertInfo = insertInfo + ",\"-\"";
+        cout << "Executable's Name field must be completed!" << endl;
+        cout << "Executable: ";
+        getline(cin, cinBuffer);
     }
-    else
-    {
-        insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
-    }
+    insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
 
     // LICENSE
     cinBuffer.clear(); //reset string
@@ -196,14 +189,11 @@ string insertValues_Application()
 string insertValues_Minimum_Req()
 {
     string cinBuffer; // reading from stdin
-    string searchInfo; // holds information about sql query for searching db with a criteria
     string insertInfo; // holds information about sql query for inserting in db
 
     int ok = 0;
 
     cout << "Minimum requirements for the application:\n";
-    searchInfo.clear();
-
     cout << "CPU (GHz): "; 
     getline(cin, cinBuffer);
 
@@ -334,6 +324,161 @@ string getAppID(sqlite3* db, string appName)
     }
 } 
 
+string searchApps(sqlite3* db)
+{
+    string cinBuffer;
+    string searchInfo; // holds information about sql query for searching db with criteria
+    cinBuffer.clear();
+    searchInfo.clear();
+    int ok = 0;
+
+    // searchInfo e de tipul
+    // (AppName="...") AND (Developer="..." AND 
+    //                      (License="..." OR License="-") 
+    //                       AND (Category="..." OR Category="-") 
+    //                       AND (InternetConnection="..." OR InternetConnection="-") 
+    //                       AND (OS_Name="..." OR OS_Name="-") 
+    //                       AND (GHzCPU>=nr OR GHzCPU="-1") 
+    //                       AND (GB_RAM>=nr OR GB_RAM="-") 
+    //                       AND (GB_HDStorage>=nr OR GB_HDStorage="-1"));
+    cout << "App's name: ";
+    getline(cin, cinBuffer);
+
+    if(cinBuffer.empty() == 0)
+    {
+        searchInfo = searchInfo + "AppName=\""+ cinBuffer + "\"";
+        ok = 1;
+    }
+    cinBuffer.clear();
+
+
+    cout << "Developer's name: ";
+    getline(cin, cinBuffer);
+
+    if(cinBuffer.empty() == 0)
+    {
+        if(ok == 1)
+        {
+            searchInfo = searchInfo + " AND Developer=\""+ cinBuffer + "\"";
+        }
+        else
+        {
+            searchInfo = searchInfo + " Developer=\""+ cinBuffer + "\"";
+            ok = 1;
+        }
+    }
+    cinBuffer.clear();
+
+    cout << "License: ";
+    getline(cin, cinBuffer);
+
+    if(cinBuffer.empty() == 0)
+    {
+        if(ok == 1)
+        {
+            searchInfo = searchInfo + " AND License=\""+ cinBuffer + "\"";
+        }
+        else
+        {
+            searchInfo = searchInfo + " License=\""+ cinBuffer + "\"";
+            ok = 1;
+        }
+        searchInfo = searchInfo + " OR License=\"-\")";
+    }
+    cinBuffer.clear();
+
+    cout << "Category: ";
+    getline(cin, cinBuffer);
+
+    if(cinBuffer.empty() == 0)
+    {
+        if(ok == 1)
+        {
+            searchInfo = searchInfo + " AND Category=\""+ cinBuffer + "\"";
+        }
+        else
+        {
+            searchInfo = searchInfo + " Category=\""+ cinBuffer + "\"";
+            ok = 1;
+        }
+        searchInfo = searchInfo + " OR Category=\"-\")";
+    }
+    cinBuffer.clear();
+
+    cout << "Internet Connection: ";
+    getline(cin, cinBuffer);
+
+    if(cinBuffer.empty() == 0)
+    {
+        if(ok == 1)
+        {
+            searchInfo = searchInfo + " AND InternetConnection=\""+ cinBuffer + "\"";
+        }
+        else
+        {
+            searchInfo = searchInfo + " InternetConnection=\""+ cinBuffer + "\"";
+            ok = 1;
+        }
+        searchInfo = searchInfo + " OR InternetConnection=\"-\")";
+    }
+    cinBuffer.clear();
+
+    cout << "Operating System: ";
+    getline(cin, cinBuffer);
+
+    if(cinBuffer.empty() == 0)
+    {
+        if(ok == 1)
+        {
+            searchInfo = searchInfo + " AND OS_Name=\""+ cinBuffer + "\"";
+        }
+        else
+        {
+            searchInfo = searchInfo + " Os_Name=\""+ cinBuffer + "\"";
+            ok = 1;
+        }
+        searchInfo = searchInfo + " OR OS_Name=\"-\")";
+    }
+    cinBuffer.clear();
+
+    cout << "Minimum CPU: ";
+    getline(cin, cinBuffer);
+
+    if(cinBuffer.empty() == 0)
+    {
+        if(ok == 1)
+        {
+            searchInfo = searchInfo + " AND (GHzCPU>="+ cinBuffer;
+        }
+        else
+        {
+            searchInfo = searchInfo + " (GHzCPU>="+ cinBuffer;
+            ok = 1;
+        }
+        searchInfo = searchInfo + " OR GHzCPU=\"-1\")";
+    }
+
+    cout << "Minimum RAM: ";
+    getline(cin, cinBuffer);
+
+    if(cinBuffer.empty() == 0)
+    {
+        searchInfo = searchInfo + "AppName=\""+ cinBuffer + "\"";
+    }
+    cinBuffer.clear();
+
+    cout << "Minimum Hard Disk Storage: ";
+    getline(cin, cinBuffer);
+
+    if(cinBuffer.empty() == 0)
+    {
+        searchInfo = searchInfo + "AppName=\""+ cinBuffer + "\"";
+    }
+    cinBuffer.clear();
+
+    return searchInfo;
+
+}
 
 int main(int argc, char* argv[])
 {
@@ -351,8 +496,8 @@ int main(int argc, char* argv[])
     }
         
     string cinBuffer; // reading from stdin
-    string searchInfo; // sql query for searching db with a criteria
-    string insertInfo; // sql query for inserting in db
+    string searchInfo; // holds information about sql query for searching db with criteria
+    string insertInfo; // holds information about sql query for inserting in db
     string sqlQuery; // sql query to be executed
     string sqlResponse; // sql query response
 
@@ -361,8 +506,7 @@ int main(int argc, char* argv[])
     cout << "Your command: ";
 
     string inputCommand;
-    cin >> inputCommand;
-    cin.ignore();     // flush the \n character out of the buffer
+    getline(cin, inputCommand);
     
     if(inputCommand == "Insert") // Insert app
     {
@@ -453,21 +597,17 @@ int main(int argc, char* argv[])
         cinBuffer.clear();
 
         cout << "\nCriteria available:\n";
-        cout << "-Developer\n";
-        cout << "-License\n";
-        cout << "-Category\n";
-        cout << "-Operating System\n";
-        cout << "-CPU\n";
-        cout << "-GPU\n";
-        cout << "-RAM\n";
-        cout << "-Hard Disk Storage\n\n";
+        cout << "- App's Name\n";
+        cout << "- Developer\n";
+        cout << "- License\n";
+        cout << "- Category\n";
+        cout << "- Internet Connection\n";
+        cout << "- Operating System\n";
+        cout << "- CPU\n";
+        cout << "- RAM\n";
+        cout << "- Hard Disk Storage\n\n";
 
-
-        cout << "Enter the search criterion as Type: criterion. (E.g. Developer: Microsoft) \n";
-        cout << "[Command]: ";
-        getline(cin,cinBuffer);
-
-        cout << "Your criterion: " << cinBuffer << endl;
+        // searchInfo = searchApps(db);
  
     }
 
