@@ -25,7 +25,7 @@ static int callback(void* data, int argc, char** argv, char** azColName) //calba
     for (int i = 0; i < argc; i++) 
     {
         strcat(information, azColName[i]);
-        strcat(information, "=");
+        strcat(information, " = ");
         if(argv[i])
         {
             strcat(information, argv[i]);
@@ -40,15 +40,15 @@ static int callback(void* data, int argc, char** argv, char** azColName) //calba
     return 0;
 }
 
-string selectQuery(sqlite3* db, string select_data)
+string selectQuery(sqlite3* db, string sqlQuery)
 {
     char* SQL_errorMessage;
     char data[maxi]; // callback argument
     string sqlQueryResult;
     sqlQueryResult.clear();
     data[0] = 0;
-    
-    int sqlExec = sqlite3_exec(db, select_data.c_str(), callback, data, &SQL_errorMessage);
+
+    int sqlExec = sqlite3_exec(db, sqlQuery.c_str(), callback, data, &SQL_errorMessage);
     if (sqlExec != SQLITE_OK)
     {
         sqlQueryResult = SQL_errorMessage;
@@ -332,15 +332,6 @@ string searchApps(sqlite3* db)
     searchInfo.clear();
     int ok = 0;
 
-    // searchInfo e de tipul
-    // (AppName="...") AND (Developer="..." AND 
-    //                      (License="..." OR License="-") 
-    //                       AND (Category="..." OR Category="-") 
-    //                       AND (InternetConnection="..." OR InternetConnection="-") 
-    //                       AND (OS_Name="..." OR OS_Name="-") 
-    //                       AND (GHzCPU>=nr OR GHzCPU="-1") 
-    //                       AND (GB_RAM>=nr OR GB_RAM="-") 
-    //                       AND (GB_HDStorage>=nr OR GB_HDStorage="-1"));
     cout << "App's name: ";
     getline(cin, cinBuffer);
 
@@ -430,11 +421,11 @@ string searchApps(sqlite3* db)
     {
         if(ok == 1)
         {
-            searchInfo = searchInfo + "AND OS_Name=\""+ cinBuffer + "\" ";
+            searchInfo = searchInfo + "AND (OS_Name=\""+ cinBuffer + "\" ";
         }
         else
         {
-            searchInfo = searchInfo + "OS_Name=\""+ cinBuffer + "\" ";
+            searchInfo = searchInfo + "(OS_Name=\""+ cinBuffer + "\" ";
             ok = 1;
         }
         searchInfo = searchInfo + "OR OS_Name=\"-\") ";
@@ -490,9 +481,11 @@ string searchApps(sqlite3* db)
             searchInfo = searchInfo + "(GB_HDStorage>="+ cinBuffer;
             ok = 1;
         }
-        searchInfo = searchInfo + " OR GB_HDStorage=\"-1\");";
+        searchInfo = searchInfo + " OR GB_HDStorage=\"-1\")";
     }
     cinBuffer.clear();
+
+    cout << endl;
 
     return searchInfo;
 
@@ -627,7 +620,16 @@ int main(int argc, char* argv[])
 
         searchInfo = searchApps(db);
 
-        cout << searchInfo << endl;
+
+        sqlQuery = "SELECT * FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
+
+        sqlResponse = selectQuery(db, sqlQuery);
+        cout << sqlResponse << endl;
+
+       
+
+        sqlQuery.clear();
+
  
     }
 
