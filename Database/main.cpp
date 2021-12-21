@@ -39,7 +39,7 @@ static int callback(void* data, int argc, char** argv, char** azColName) //calba
     return 0;
 }
 
-void insertQuery(string sqlQuery, sqlite3* db)
+void insertQuery(sqlite3* db, string sqlQuery)
 {
     char* SQL_errorMessage; // error message from sql query
     char data[maxi]; // callback argument
@@ -83,7 +83,6 @@ string insertValues_Application()
     }
 
     insertInfo = insertInfo + "\""+ cinBuffer + "\"";
-    searchInfo = searchInfo + "AppName = \"" + cinBuffer + "\"";
 
     // DEVELOPER
     cinBuffer.clear(); //reset string
@@ -93,12 +92,10 @@ string insertValues_Application()
     if(cinBuffer.empty() == 1)
     {
         insertInfo = insertInfo + ",\"-\"";
-        searchInfo = searchInfo + " AND Developer = \"-\"";
     }
     else
     {
         insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
-        searchInfo = searchInfo + " AND Developer = \"" + cinBuffer + "\"";
     }
 
     // EXECUTABLE NAME
@@ -109,12 +106,10 @@ string insertValues_Application()
     if(cinBuffer.empty() == 1)
     {
         insertInfo = insertInfo + ",\"-\"";
-        searchInfo = searchInfo + " AND Executable_Name = \"-\"";
     }
     else
     {
         insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
-        searchInfo = searchInfo + " AND Executable_Name = \"" + cinBuffer + "\"";
     }
 
     // LICENSE
@@ -125,12 +120,10 @@ string insertValues_Application()
     if(cinBuffer.empty() == 1)
     {
         insertInfo = insertInfo + ",\"-\"";
-        searchInfo = searchInfo + " AND License = \"-\"";
     }
     else
     {
         insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
-        searchInfo = searchInfo + " AND License = \"" + cinBuffer + "\"";
     }
 
     // CATEGORY
@@ -141,12 +134,10 @@ string insertValues_Application()
     if(cinBuffer.empty() == 1)
     {
         insertInfo = insertInfo + ",\"-\"";
-        searchInfo = searchInfo + " AND Category = \"-\"";
     }
     else
     {
         insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
-        searchInfo = searchInfo + " AND Category = \"" + cinBuffer + "\"";
     }
 
     // INTERNET CONNECTION (YES/NO)
@@ -157,12 +148,10 @@ string insertValues_Application()
     if(cinBuffer.empty() == 1)
     {
         insertInfo = insertInfo + ",\"-\"";
-        searchInfo = searchInfo + " AND InternetConnection = \"-\"";
     }
     else
     {
         insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
-        searchInfo = searchInfo + " AND InternetConnection = \"" + cinBuffer + "\"";
     }
 
     // DESCRIPTION
@@ -173,69 +162,204 @@ string insertValues_Application()
     if(cinBuffer.empty() == 1)
     {
         insertInfo = insertInfo + ",\"-\"";
-        searchInfo = searchInfo + " AND AppInfo= \"-\"";
     }
     else
     {
         insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
-        searchInfo = searchInfo + " AND AppInfo = \"" + cinBuffer + "\"";
     }
-
-    cout << "\ninsertInfo...\n"<< insertInfo << endl << "searchInfo...\n" << searchInfo << endl;
 
     return insertInfo;
 }
 
-void selectQuery(string select_data, sqlite3* db)
+string insertValues_OS()
+{
+    string cinBuffer; // reading from stdin
+    string searchInfo; // holds information about sql query for searching db with a criteria
+    string insertInfo; // holds information about sql query for inserting in db
+
+    cout << "Operating System details:\n";
+    cout << "For multiple distros, write \",\" between them.\n";
+    searchInfo.clear();
+
+    cout << "OS distribution: "; 
+    getline(cin, cinBuffer);
+
+    if(cinBuffer.empty() == 1)
+    {
+        insertInfo = insertInfo + "\"-\"";
+    }
+    else
+    {
+        insertInfo = insertInfo + "\""+ cinBuffer + "\"";
+    }
+    cinBuffer.clear();
+
+    return insertInfo;
+}
+
+string insertValues_Minimum_Req()
+{
+    string cinBuffer; // reading from stdin
+    string searchInfo; // holds information about sql query for searching db with a criteria
+    string insertInfo; // holds information about sql query for inserting in db
+
+    int ok = 0;
+
+    cout << "Minimum requirements for the application:\n";
+    searchInfo.clear();
+
+    cout << "CPU (GHz): "; 
+    getline(cin, cinBuffer);
+
+    if(cinBuffer.empty() == 1)
+    {
+        insertInfo = insertInfo + "\"-\"";
+    }
+    else
+    {
+        insertInfo = insertInfo + "\""+ cinBuffer + "\"";
+        ok = 1;
+    }
+
+    cinBuffer.clear();
+    cout << "GPU: "; 
+    getline(cin, cinBuffer);
+
+    if(ok == 1)
+    {
+        if(cinBuffer.empty() == 1)
+        {
+            insertInfo = insertInfo + ",\"-\"";
+        }
+        else
+        {
+            insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
+        }
+    }
+    else
+    {
+        if(cinBuffer.empty() == 1)
+        {
+            insertInfo = insertInfo + "\"-\"";
+        }
+        else
+        {
+            insertInfo = insertInfo + "\""+ cinBuffer + "\"";
+            ok = 1;
+        }
+    }
+
+
+    cinBuffer.clear();
+    cout << "RAM (GB): "; 
+    getline(cin, cinBuffer);
+
+    if(ok == 1)
+    {
+        if(cinBuffer.empty() == 1)
+        {
+            insertInfo = insertInfo + ",\"-\"";
+        }
+        else
+        {
+            insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
+        }
+    }
+    else
+    {
+        if(cinBuffer.empty() == 1)
+        {
+            insertInfo = insertInfo + "\"-\"";
+        }
+        else
+        {
+            insertInfo = insertInfo + "\""+ cinBuffer + "\"";
+            ok = 1;
+        }
+    }
+
+    cinBuffer.clear();
+    cout << "Hard Disk Storage (GB): "; 
+    getline(cin, cinBuffer);
+
+    if(ok == 1)
+    {
+        if(cinBuffer.empty() == 1)
+        {
+            insertInfo = insertInfo + ",\"-\"";
+        }
+        else
+        {
+            insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
+        }
+    }
+    else
+    {
+        if(cinBuffer.empty() == 1)
+        {
+            insertInfo = insertInfo + "\"-\"";
+        }
+        else
+        {
+            insertInfo = insertInfo + "\""+ cinBuffer + "\"";
+        }
+    }
+
+    return insertInfo;
+}
+
+
+void selectQuery(sqlite3* db, string select_data)
 {
     char* SQL_errorMessage;
     char data[maxi]; // callback argument
-    string result;
-
+    string sqlQueryResult;
+    sqlQueryResult.clear();
     data[0] = 0;
-    result.clear();
-
-    int rc = sqlite3_exec(db, select_data.c_str(), callback, data, &SQL_errorMessage);
-    if (rc != SQLITE_OK)
+    
+    int sqlExec = sqlite3_exec(db, select_data.c_str(), callback, data, &SQL_errorMessage);
+    if (sqlExec != SQLITE_OK)
     {
-        result = SQL_errorMessage;
-        cout << result;
+        sqlQueryResult = SQL_errorMessage;
+        cout << sqlQueryResult;
         sqlite3_free (SQL_errorMessage);
     }
     else
     {
-        data[strlen(data)-1]=0;
-        result = data;
-        cout << endl << result;
+        data[strlen(data) - 1] = 0;
+        sqlQueryResult = data;
+        cout << endl << sqlQueryResult;
     }
 }
 
-int return_id_app( string conditie_select , sqlite3* db) 
+int getAppID(sqlite3* db, string appName) 
 {
-    char* SQL_errorMessage; // mesaju de eroare
+    char* SQL_errorMessage; // error message from sql query
     char data[maxi]; // callback argument
-    string result;
-
+    string sqlQueryResult;
+    sqlQueryResult.clear();
     data[0] = 0;
-    result.clear();
 
-    int rc = sqlite3_exec(db, conditie_select.c_str(), callback, data, &SQL_errorMessage);
-    if (rc != SQLITE_OK)
+    string sqlQuery = "SELECT AppID FROM Application WHERE AppName = \"" + appName + "\";";
+
+    int sqlExec = sqlite3_exec(db, sqlQuery.c_str(), callback, data, &SQL_errorMessage);
+    if (sqlExec != SQLITE_OK)
     {
-        result = SQL_errorMessage;
-        cout << result;
+        sqlQueryResult = SQL_errorMessage;
+        cout << sqlQueryResult;
         sqlite3_free (SQL_errorMessage);
         return 0;
     }
     else
     {
-        data[strlen(data)-1]='\0';
-        result = data;
-    }
+        data[strlen(data) - 1] = '\0';
+        sqlQueryResult = data;
 
-    int poz = result.find('=');
-    string id_app = result.substr(poz+1,result.length()-poz);
-    return stoi(id_app);
+        int position = sqlQueryResult.find("=");
+        int appID = stoi(sqlQueryResult.substr(position + 1, sqlQueryResult.length() - position));
+
+        return appID;
+    }
 } 
 
 
@@ -258,7 +382,6 @@ int main(int argc, char* argv[])
     string searchInfo; // sql query for searching db with a criteria
     string insertInfo; // sql query for inserting in db
     string sqlQuery; // sql query to be executed
-    int count_arg = 0;
 
     cout << "[1] To insert your Application, write \"Insert\". \n";
     cout << "[2] To search an Application, write \"Search\". \n";
@@ -270,18 +393,41 @@ int main(int argc, char* argv[])
     if(inputCommand == "Insert") // Insert app
     {
         insertInfo = insertValues_Application();
-
         sqlQuery.clear();
 
         sqlQuery = "INSERT INTO Application(AppName, Developer, Executable_name, License, Category, InternetConnection, AppInfo) VALUES(" + insertInfo + ");";
-        cout << sqlQuery << endl;
-
-        insertQuery(sqlQuery, db);
-
+        insertQuery(db, sqlQuery);
         sqlQuery.clear();
 
+        int secondposition = insertInfo.find("\"", 1); 
+        cout << "A doua pozitie: " << secondposition << endl;
+        string appName = insertInfo.substr(1,secondposition-1);
+        int appID = getAppID(db, appName);
 
+        cout << "ID-ul aplicatiei " << appName << " este " << appID << endl;
+
+                
+        insertInfo = insertValues_OS();
+        sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES(\""+ to_string(appID) + "\", " + insertInfo + ");";
+
+        cout << sqlQuery << endl;
+
+
+        insertQuery(db, sqlQuery);
+        
+/*
+        insertInfo = insertValues_Minimum_Req();
+        //string appName;
+        // int id = to_string(getID(appName));
+        sqlQuery = "INSERT INTO Minimum_Req(AppID,GHzCPU, GPU, GB_RAM, GB_HDStorage) VALUES(" + insertInfo + ");";
+
+        cout << sqlQuery << endl;
+
+        // de aflat id ul anterior
+
+        //insertQuery(sqlQuery, db);
         // to do - cere inf despre celelalte 2 tabele si adauga 2 insert
+*/
     }
     else
     if(inputCommand == "Search")          // cautare in db
