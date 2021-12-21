@@ -346,7 +346,7 @@ string searchApps(sqlite3* db)
 
     if(cinBuffer.empty() == 0)
     {
-        searchInfo = searchInfo + "AppName=\""+ cinBuffer + "\"";
+        searchInfo = searchInfo + "AppName=\""+ cinBuffer + "\" ";
         ok = 1;
     }
     cinBuffer.clear();
@@ -359,11 +359,11 @@ string searchApps(sqlite3* db)
     {
         if(ok == 1)
         {
-            searchInfo = searchInfo + " AND Developer=\""+ cinBuffer + "\"";
+            searchInfo = searchInfo + "AND Developer=\""+ cinBuffer + "\" ";
         }
         else
         {
-            searchInfo = searchInfo + " Developer=\""+ cinBuffer + "\"";
+            searchInfo = searchInfo + "Developer=\""+ cinBuffer + "\" ";
             ok = 1;
         }
     }
@@ -376,14 +376,14 @@ string searchApps(sqlite3* db)
     {
         if(ok == 1)
         {
-            searchInfo = searchInfo + " AND License=\""+ cinBuffer + "\"";
+            searchInfo = searchInfo + "AND (License=\""+ cinBuffer + "\" ";
         }
         else
         {
-            searchInfo = searchInfo + " License=\""+ cinBuffer + "\"";
+            searchInfo = searchInfo + "(License=\""+ cinBuffer + "\" ";
             ok = 1;
         }
-        searchInfo = searchInfo + " OR License=\"-\")";
+        searchInfo = searchInfo + "OR License=\"-\") ";
     }
     cinBuffer.clear();
 
@@ -394,14 +394,14 @@ string searchApps(sqlite3* db)
     {
         if(ok == 1)
         {
-            searchInfo = searchInfo + " AND Category=\""+ cinBuffer + "\"";
+            searchInfo = searchInfo + "AND (Category=\""+ cinBuffer + "\" ";
         }
         else
         {
-            searchInfo = searchInfo + " Category=\""+ cinBuffer + "\"";
+            searchInfo = searchInfo + "(Category=\""+ cinBuffer + "\" ";
             ok = 1;
         }
-        searchInfo = searchInfo + " OR Category=\"-\")";
+        searchInfo = searchInfo + "OR Category=\"-\") ";
     }
     cinBuffer.clear();
 
@@ -412,14 +412,14 @@ string searchApps(sqlite3* db)
     {
         if(ok == 1)
         {
-            searchInfo = searchInfo + " AND InternetConnection=\""+ cinBuffer + "\"";
+            searchInfo = searchInfo + "AND (InternetConnection=\""+ cinBuffer + "\" ";
         }
         else
         {
-            searchInfo = searchInfo + " InternetConnection=\""+ cinBuffer + "\"";
+            searchInfo = searchInfo + "(InternetConnection=\""+ cinBuffer + "\" ";
             ok = 1;
         }
-        searchInfo = searchInfo + " OR InternetConnection=\"-\")";
+        searchInfo = searchInfo + "OR InternetConnection=\"-\") ";
     }
     cinBuffer.clear();
 
@@ -430,14 +430,14 @@ string searchApps(sqlite3* db)
     {
         if(ok == 1)
         {
-            searchInfo = searchInfo + " AND OS_Name=\""+ cinBuffer + "\"";
+            searchInfo = searchInfo + "AND OS_Name=\""+ cinBuffer + "\" ";
         }
         else
         {
-            searchInfo = searchInfo + " Os_Name=\""+ cinBuffer + "\"";
+            searchInfo = searchInfo + "OS_Name=\""+ cinBuffer + "\" ";
             ok = 1;
         }
-        searchInfo = searchInfo + " OR OS_Name=\"-\")";
+        searchInfo = searchInfo + "OR OS_Name=\"-\") ";
     }
     cinBuffer.clear();
 
@@ -448,14 +448,14 @@ string searchApps(sqlite3* db)
     {
         if(ok == 1)
         {
-            searchInfo = searchInfo + " AND (GHzCPU>="+ cinBuffer;
+            searchInfo = searchInfo + "AND (GHzCPU>="+ cinBuffer;
         }
         else
         {
-            searchInfo = searchInfo + " (GHzCPU>="+ cinBuffer;
+            searchInfo = searchInfo + "(GHzCPU>="+ cinBuffer;
             ok = 1;
         }
-        searchInfo = searchInfo + " OR GHzCPU=\"-1\")";
+        searchInfo = searchInfo + " OR GHzCPU=\"-1\") ";
     }
 
     cout << "Minimum RAM: ";
@@ -463,7 +463,16 @@ string searchApps(sqlite3* db)
 
     if(cinBuffer.empty() == 0)
     {
-        searchInfo = searchInfo + "AppName=\""+ cinBuffer + "\"";
+        if(ok == 1)
+        {
+            searchInfo = searchInfo + "AND (GB_RAM>="+ cinBuffer;
+        }
+        else
+        {
+            searchInfo = searchInfo + "(GB_RAM>="+ cinBuffer;
+            ok = 1;
+        }
+        searchInfo = searchInfo + " OR GB_RAM=\"-1\") ";
     }
     cinBuffer.clear();
 
@@ -472,7 +481,16 @@ string searchApps(sqlite3* db)
 
     if(cinBuffer.empty() == 0)
     {
-        searchInfo = searchInfo + "AppName=\""+ cinBuffer + "\"";
+        if(ok == 1)
+        {
+            searchInfo = searchInfo + "AND (GB_HDStorage>="+ cinBuffer;
+        }
+        else
+        {
+            searchInfo = searchInfo + "(GB_HDStorage>="+ cinBuffer;
+            ok = 1;
+        }
+        searchInfo = searchInfo + " OR GB_HDStorage=\"-1\");";
     }
     cinBuffer.clear();
 
@@ -607,7 +625,9 @@ int main(int argc, char* argv[])
         cout << "- RAM\n";
         cout << "- Hard Disk Storage\n\n";
 
-        // searchInfo = searchApps(db);
+        searchInfo = searchApps(db);
+
+        cout << searchInfo << endl;
  
     }
 
