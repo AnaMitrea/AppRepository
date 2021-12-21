@@ -40,6 +40,29 @@ static int callback(void* data, int argc, char** argv, char** azColName) //calba
     return 0;
 }
 
+string selectQuery(sqlite3* db, string select_data)
+{
+    char* SQL_errorMessage;
+    char data[maxi]; // callback argument
+    string sqlQueryResult;
+    sqlQueryResult.clear();
+    data[0] = 0;
+    
+    int sqlExec = sqlite3_exec(db, select_data.c_str(), callback, data, &SQL_errorMessage);
+    if (sqlExec != SQLITE_OK)
+    {
+        sqlQueryResult = SQL_errorMessage;
+        return sqlQueryResult;
+        sqlite3_free (SQL_errorMessage);
+    }
+    else
+    {
+        data[strlen(data) - 1] = 0;
+        sqlQueryResult = data;
+        return sqlQueryResult;
+    }
+}
+
 string insertQuery(sqlite3* db, string sqlQuery)
 {
     char* SQL_errorMessage; // error message from sql query
@@ -186,11 +209,11 @@ string insertValues_Minimum_Req()
 
     if(cinBuffer.empty() == 1)
     {
-        insertInfo = insertInfo + "\"-\"";
+        insertInfo = insertInfo + "-1";
     }
     else
     {
-        insertInfo = insertInfo + "\""+ cinBuffer + "\"";
+        insertInfo = insertInfo + cinBuffer;
         ok = 1;
     }
 
@@ -213,11 +236,11 @@ string insertValues_Minimum_Req()
     {
         if(cinBuffer.empty() == 1)
         {
-            insertInfo = insertInfo + "\"-\"";
+            insertInfo = insertInfo + "-1";
         }
         else
         {
-            insertInfo = insertInfo + "\""+ cinBuffer + "\"";
+            insertInfo = insertInfo + cinBuffer;
             ok = 1;
         }
     }
@@ -231,22 +254,22 @@ string insertValues_Minimum_Req()
     {
         if(cinBuffer.empty() == 1)
         {
-            insertInfo = insertInfo + ",\"-\"";
+            insertInfo = insertInfo + ",-1";
         }
         else
         {
-            insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
+            insertInfo = insertInfo + ","+ cinBuffer;
         }
     }
     else
     {
         if(cinBuffer.empty() == 1)
         {
-            insertInfo = insertInfo + "\"-\"";
+            insertInfo = insertInfo + "-1";
         }
         else
         {
-            insertInfo = insertInfo + "\""+ cinBuffer + "\"";
+            insertInfo = insertInfo + cinBuffer;
             ok = 1;
         }
     }
@@ -259,49 +282,26 @@ string insertValues_Minimum_Req()
     {
         if(cinBuffer.empty() == 1)
         {
-            insertInfo = insertInfo + ",\"-\"";
+            insertInfo = insertInfo + ",-1";
         }
         else
         {
-            insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
+            insertInfo = insertInfo + ","+ cinBuffer;
         }
     }
     else
     {
         if(cinBuffer.empty() == 1)
         {
-            insertInfo = insertInfo + "\"-\"";
+            insertInfo = insertInfo + "-1";
         }
         else
         {
-            insertInfo = insertInfo + "\""+ cinBuffer + "\"";
+            insertInfo = insertInfo+ cinBuffer;
         }
     }
 
     return insertInfo;
-}
-
-void selectQuery(sqlite3* db, string select_data)
-{
-    char* SQL_errorMessage;
-    char data[maxi]; // callback argument
-    string sqlQueryResult;
-    sqlQueryResult.clear();
-    data[0] = 0;
-    
-    int sqlExec = sqlite3_exec(db, select_data.c_str(), callback, data, &SQL_errorMessage);
-    if (sqlExec != SQLITE_OK)
-    {
-        sqlQueryResult = SQL_errorMessage;
-        cout << sqlQueryResult;
-        sqlite3_free (SQL_errorMessage);
-    }
-    else
-    {
-        data[strlen(data) - 1] = 0;
-        sqlQueryResult = data;
-        cout << endl << sqlQueryResult;
-    }
 }
 
 string getAppID(sqlite3* db, string appName) 
@@ -448,41 +448,27 @@ int main(int argc, char* argv[])
     else
     if(inputCommand == "Search")          // cautare in db
     {
-        /*
-        count_arg = 0;
-        cout << "Introduceti date pentru cautare:\n";
-        cout << "nume: "; getline(cin,cinBuffer);
-        if(cinBuffer.empty() == 0)
-        {
-            searchInfo = searchInfo + "name = \"" + cinBuffer + "\"";
-            count_arg++;
-        }
-
-        cinBuffer.clear();
-        cout << "manufacturer: ";
-        getline(cin,cinBuffer);
-        if(cinBuffer.empty() == 0)
-        {
-            if(count_arg != 0)
-            {
-                searchInfo.append(" AND ");
-            }
-            searchInfo = searchInfo + "manufacturer = \"" + cinBuffer + "\"";
-            count_arg++;
-        }
-
-        // to do : sa adaug fiecare Cerere de inf
-
-        cinBuffer.clear();
-
         sqlQuery.clear();
-        if(searchInfo.empty() == 0 )
-            sqlQuery = "SELECT * FROM AppRepository WHERE " + searchInfo + " ;";
-        else
-            sqlQuery = "SELECT * FROM AppRepository;";
+        searchInfo.clear();
+        cinBuffer.clear();
 
-        selectQuery( sqlQuery , db);
-        */
+        cout << "\nCriteria available:\n";
+        cout << "-Developer\n";
+        cout << "-License\n";
+        cout << "-Category\n";
+        cout << "-Operating System\n";
+        cout << "-CPU\n";
+        cout << "-GPU\n";
+        cout << "-RAM\n";
+        cout << "-Hard Disk Storage\n\n";
+
+
+        cout << "Enter the search criterion as Type: criterion. (E.g. Developer: Microsoft) \n";
+        cout << "[Command]: ";
+        getline(cin,cinBuffer);
+
+        cout << "Your criterion: " << cinBuffer << endl;
+ 
     }
 
 
