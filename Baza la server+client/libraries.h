@@ -15,26 +15,25 @@
 #include <errno.h>
 #include <string>
 #include <iostream>
-
 using namespace std;
-
 
 // CLIENT+SERVER FUNCTIONS
 #define MAXIMUM 1024
 
 
-
 // CLIENT FUNCTIONS
 int errorHandling(string errmsg);
 void printInstructions();
-void readingInfo_IN_CLIENT(int sd);
-void sendingCommand_IN_CLIENT(int sd, int bytes, string command);
+void readingInfo_CLIENT(int sd);
+void sendingCommand_CLIENT(int sd, int bytes, string command);
 
 
 // SERVER FUNCTIONS
 #define PORT 2024
 void sighandler();
-
+string readingCommand_SERVER(int client, int bytes);
+void readingInfo_SERVER(int sd);
+int numBytesSent(int client);
 
 
 int errorHandling(string errmsg)
@@ -56,26 +55,26 @@ void printInstructions()
   cout << "[3] To Disconnect from the server, please write \"Disconnect\". \n" << endl;
 }
 
-void sendingCommand_IN_CLIENT(int sd, int bytes, string command)
+void sendingCommand_CLIENT(int sd, int bytes, string command)
 {
-  if (write (sd, &bytes, sizeof(int)) <= 0) /// trimitere bytes la server 
+  if (write (sd, &bytes, sizeof(int)) <= 0)
   {
-    errorHandling("[client] Error at writting num bytes for server.\n");
+    errorHandling("[ERROR] Error at writting num bytes for server.\n");
   }
   
-  if (write (sd, command.c_str(), bytes) <= 0)  // trimitere comanda la server
+  if (write (sd, command.c_str(), bytes) <= 0)
   {
-    errorHandling("[client] Error at writting command for server.\n");
+    errorHandling("[ERROR] Error at writting command for server.\n");
   }
 }
 
-void readingInfo_IN_CLIENT(int sd)
+void readingInfo_CLIENT(int sd)
 {
   int bytes_sent;
   // citirea raspunsului dat de server (apel blocant pana cand serverul raspunde)
   if (read (sd, &bytes_sent, sizeof(int)) < 0)
   {
-    errorHandling("[client] Error at reading num bytes from server.\n");
+    errorHandling("[ERROR] Error at reading num bytes from server.\n");
   }
 
   char information[bytes_sent];
@@ -83,10 +82,50 @@ void readingInfo_IN_CLIENT(int sd)
 
   if (read (sd, information, bytes_sent) < 0)
   {
-    errorHandling("[client] Error at reading message from server.\n");
+    errorHandling("[ERROR] Error at reading message from server.\n");
   }
 
   information[strlen(information)] = '\0';
 
-  cout << "[client] " << information << endl;
+  cout << "[MSG received] " << information << endl;
 }
+
+int numBytesSent(int client)
+{
+  int bytes_sent;
+  if (read (client, &bytes_sent, sizeof(int)) < 0) 
+  {
+      perror ("[server] Error at reading num bytes from client.\n");
+      close(client);
+      exit(1);
+      return -1;
+  }
+  return bytes_sent;
+}
+
+string readingCommand_SERVER(int client, int bytes)
+{
+  int bytes_sent = numBytesSent(client);
+  if(bytes_sent == -1)
+  {
+    errorHandling("[server] Error: -1 Bytes received.\n");
+  }
+  char information[bytes_sent];
+  bzero (information, bytes_sent);
+
+  if (read (client, information, bytes_sent) < 0)
+  {
+      perror ("[server] Error at reading command from client.\n");
+      close(client);  
+      exit(1);
+  }
+  information[strlen(information)] = '\0';
+
+  string info = information;
+
+  cout << "Informatia de la client in server: " << info << endl; 
+
+  return info;
+}
+
+
