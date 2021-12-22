@@ -1,27 +1,10 @@
 #include "libraries.h"
 
-#define PORT 2024
-#define MAXIMUM 1024
-
-int errorHandling(string errmsg);
-void sighandler();
-
-int errorHandling(string errmsg)
-{
-  perror(errmsg.c_str());
-  return errno;
-}
-
-void sighandler()
-{
-  while(waitpid(-1, NULL, WNOHANG) > 0);
-}
-
 int main ()
 {
-  struct sockaddr_in server;	// structura folosita de server
+  struct sockaddr_in server;	// structure used by server
   struct sockaddr_in from;	
-  int sd;			// socket descriptor
+  int sd;
 
   if (signal (SIGCHLD, (sighandler_t)sighandler) == SIG_ERR)
   {
@@ -29,10 +12,9 @@ int main ()
     return 1;
   }
 
-  /* crearea unui socket */
   if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1)
   {
-    errorHandling("[server]Eroare la socket().\n");
+    errorHandling("[server]Error socket().\n");
   }
 
   /* pregatirea structurilor de date */
@@ -50,13 +32,13 @@ int main ()
   /* atasam socketul */
   if (bind (sd, (struct sockaddr *) &server, sizeof (struct sockaddr)) == -1)
   {
-    errorHandling("[server]Eroare la bind().\n");
+    errorHandling("[server]Error bind().\n");
   }
 
   /* punem serverul sa asculte daca vin clienti sa se conecteze */
   if (listen (sd, 5) == -1)
   {
-    errorHandling("[server]Eroare la listen().\n");
+    errorHandling("[server]Error listen().\n");
   }
 
   /* servim in mod concurent clientii... */
@@ -65,7 +47,7 @@ int main ()
     int client;
     socklen_t length = sizeof (from);
 
-    printf ("[server] Asteptam la portul %d...\n",PORT);
+    printf ("[server] Wainting at %d port...\n",PORT);
     fflush (stdout);
 
     /* acceptam un client (stare blocanta pana la realizarea conexiunii) */
