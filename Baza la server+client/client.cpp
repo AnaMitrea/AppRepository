@@ -44,11 +44,10 @@ int main (int argc, char *argv[])
     fflush (stdout);
     getline(cin, command);
 
-    // Trimitere comanda introdusa catre server
     if(command == "Disconnect")
     {
       int bytes = strlen("Disconnect") + 1;
-      sendingCommand_IN_CLIENT(sd, bytes, command);
+      sendingCommand_CLIENT(sd, bytes, command);
 
       cout << "You have disconnected from the server...\n"s;
       close(sd);
@@ -58,13 +57,13 @@ int main (int argc, char *argv[])
     if(command == "Insert")
     {
       int bytes = strlen("Insert") + 1;
-      sendingCommand_IN_CLIENT(sd, bytes, command);
+      sendingCommand_CLIENT(sd, bytes, command);
     }
     else
     if(command == "Search")
     {
       int bytes = strlen("Search") + 1;
-      sendingCommand_IN_CLIENT(sd, bytes, command);
+      sendingCommand_CLIENT(sd, bytes, command);
     }
     else
     {
@@ -75,7 +74,7 @@ int main (int argc, char *argv[])
 
     if(ok == 1)
     {
-      readingInfo_IN_CLIENT(sd);
+      readingInfo_CLIENT(sd);
     }
   }
 }
