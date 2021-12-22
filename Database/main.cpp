@@ -12,7 +12,18 @@
 #include <string>
 #include <algorithm>
 using namespace std;
-#define maxi 1024
+#define maxi 100000
+
+static int callback(void* data, int argc, char** argv, char** azColName);
+static int callback_SEARCH(void* data, int argc, char** argv, char** azColName);
+string selectQuery(sqlite3* db, string sqlQuery);
+string selectQuery_SEARCH(sqlite3* db, string sqlQuery);
+string insertQuery(sqlite3* db, string sqlQuery);
+string insertValues_Application();
+string insertValues_Minimum_Req();
+string getAppID(sqlite3* db, string appName);
+string searchApps(sqlite3* db);
+int numberOfAppsFound(sqlite3* db, string sqlQuery);
 
 static int callback(void* data, int argc, char** argv, char** azColName) //calback function used in sqlite
 {
@@ -40,6 +51,35 @@ static int callback(void* data, int argc, char** argv, char** azColName) //calba
     return 0;
 }
 
+static int callback_SEARCH(void* data, int argc, char** argv, char** azColName) //calback function used in sqlite
+{
+    // information from sql query to be displayed as:
+    // atribute1 = value1
+    // atribute2 = value2
+    // ...
+
+    char* information = (char*) data;
+    for (int i = 0; i < argc; i++) 
+    {
+        if(strcmp(azColName[i], "AppID") != 0)
+        {
+            strcat(information, azColName[i]);
+            strcat(information, " = ");
+            if(argv[i])
+            {
+                strcat(information, argv[i]);
+            }
+            else
+            {
+                strcat(information,"-");
+            }
+            strcat(information,"\n");
+        }
+    }
+    strcat(information, "\n");
+    return 0;
+}
+
 string selectQuery(sqlite3* db, string sqlQuery)
 {
     char* SQL_errorMessage;
@@ -49,6 +89,29 @@ string selectQuery(sqlite3* db, string sqlQuery)
     data[0] = 0;
 
     int sqlExec = sqlite3_exec(db, sqlQuery.c_str(), callback, data, &SQL_errorMessage);
+    if (sqlExec != SQLITE_OK)
+    {
+        sqlQueryResult = SQL_errorMessage;
+        return sqlQueryResult;
+        sqlite3_free (SQL_errorMessage);
+    }
+    else
+    {
+        data[strlen(data) - 1] = 0;
+        sqlQueryResult = data;
+        return sqlQueryResult;
+    }
+}
+
+string selectQuery_SEARCH(sqlite3* db, string sqlQuery)
+{
+    char* SQL_errorMessage;
+    char data[maxi]; // callback argument
+    string sqlQueryResult;
+    sqlQueryResult.clear();
+    data[0] = 0;
+
+    int sqlExec = sqlite3_exec(db, sqlQuery.c_str(), callback_SEARCH, data, &SQL_errorMessage);
     if (sqlExec != SQLITE_OK)
     {
         sqlQueryResult = SQL_errorMessage;
@@ -491,6 +554,17 @@ string searchApps(sqlite3* db)
 
 }
 
+int numberOfAppsFound(sqlite3* db, string sqlQuery)
+{
+    string sqlResponse; // sql query response
+    sqlResponse = selectQuery_SEARCH(db, sqlQuery);
+
+    string nr = sqlResponse.substr(25,string::npos);
+    int num = stoi(nr);
+
+    return num;
+}
+
 int main(int argc, char* argv[])
 {
     sqlite3* db;
@@ -620,14 +694,17 @@ int main(int argc, char* argv[])
 
         searchInfo = searchApps(db);
 
+        
+        sqlQuery = "SELECT COUNT(DISTINCT AppName) FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
+
+        int appsFound = numberOfAppsFound(db, sqlQuery);
+        cout << "Found "<< appsFound << " programs for the criteria. \n\n";
+        sqlQuery.clear();
 
         sqlQuery = "SELECT * FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
 
-        sqlResponse = selectQuery(db, sqlQuery);
+        sqlResponse = selectQuery_SEARCH(db, sqlQuery);
         cout << sqlResponse << endl;
-
-       
-
         sqlQuery.clear();
 
  
