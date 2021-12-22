@@ -17,43 +17,35 @@ int main ()
     errorHandling("[server]Error socket().\n");
   }
 
-  /* pregatirea structurilor de date */
   bzero (&server, sizeof (server));
   bzero (&from, sizeof (from));
   
-  /* umplem structura folosita de server */
-  /* stabilirea familiei de socket-uri */
-    server.sin_family = AF_INET;	
-  /* acceptam orice adresa */
-    server.sin_addr.s_addr = htonl (INADDR_ANY);
-  /* utilizam un port utilizator */
-    server.sin_port = htons (PORT);
+  // Filling the structure used for establishing connection with server
+  server.sin_family = AF_INET;	// Socket Family
+  server.sin_addr.s_addr = htonl (INADDR_ANY); // any address
+  server.sin_port = htons (PORT); // Connection port
   
-  /* atasam socketul */
   if (bind (sd, (struct sockaddr *) &server, sizeof (struct sockaddr)) == -1)
   {
     errorHandling("[server]Error bind().\n");
   }
 
-  /* punem serverul sa asculte daca vin clienti sa se conecteze */
-  if (listen (sd, 5) == -1)
+  if (listen (sd, 5) == -1) // queue of 5 
   {
     errorHandling("[server]Error listen().\n");
   }
 
-  /* servim in mod concurent clientii... */
   while (1)
   {
     int client;
     socklen_t length = sizeof (from);
 
-    printf ("[server] Wainting at %d port...\n",PORT);
+    cout << "[server] Waiting at "<< PORT << " port...\n";
     fflush (stdout);
 
-    /* acceptam un client (stare blocanta pana la realizarea conexiunii) */
+    // Accepting client (blocking state till connection establishes)
     client = accept (sd, (struct sockaddr *) &from, &length);
 
-    /* eroare la acceptarea conexiunii de la un client */
     if (client < 0)
     {
       perror ("[server] Eroare la accept().\n");
@@ -63,46 +55,44 @@ int main ()
     if(fork() == 0)  // child process
     {
       close(sd);
-      char command[MAXIMUM];
 
       while(1)
       {
-        /* s-a realizat conexiunea, se astepta mesajul */
-        bzero (command, MAXIMUM);
-        printf ("[server] Waiting client to write command...\n");
+        // connection ok, waiting msg
+        cout << "[server] Waiting client to write command...\n";
         fflush (stdout);
 
-        /* Citire bytes si comanda de la client*/
-        int bytes_sent;  //bytes trimisi de client
+        int bytes_sent;
         if (read (client, &bytes_sent, sizeof(int)) < 0) 
         {
             perror ("[server] Error at reading num bytes from client.\n");
-            close(client); /* inchidem conexiunea cu clientul */
-            break;  /* continuam sa ascultam */
+            close(client);
+            break;  // continuam sa ascultam
         }
+
+        char command[bytes_sent];
+        bzero (command, MAXIMUM);
 
         if (read (client, command, bytes_sent) < 0)
         {
             perror ("[server] Error at reading command from client.\n");
-            close(client);  /* inchidem conexiunea cu clientul */
-            break;  /* continuam sa ascultam */
+            close(client);  
+            break;  // continuam sa ascultam
         }
         
         command[strlen(command)] = '\0';
-        printf ("[server] Command sent by client: \"%s\"\n", command);
+        cout << "[server] Command sent by client: \"" << command << "\"\n";
         
-
-        /*pregatim mesajul de raspuns */
         if(strcmp(command,"Disconnect") == 0)
         {
           printf ("[server] A client has disconnected from server. \n");
-          close (client); /* inchidem conexiunea cu clientul */
+          close (client); 
           exit(1);
         }
         else
         if(strcmp(command,"Insert") == 0)
         {
-          printf ("[server] Client wants to add an app. \n");
+          cout << "[server] Client wants to add an app. \n";
 
           char information[100];
           bzero(information,100);
