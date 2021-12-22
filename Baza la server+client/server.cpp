@@ -77,59 +77,28 @@ int main ()
         {
           cout << "[server] Client wants to add an app. \n";
 
-          char information[100];
-          bzero(information,100);
-          strcpy(information, "[testing] Application has been added successfully.");
+          string information;
+          information.clear();
+          information = "[testing] Application has been added successfully.";
 
-          printf ("[server] Sending back information... \n");
+          cout << "[server] Sending back information... \n";
 
-          int bytes = strlen(information) + 1;  // bytes de trimis la client
-
-          if (write (client, &bytes, sizeof(int)) <= 0)
-          {
-              perror ("[server] Error at writting num bytes for client.\n");
-              break; /* continuam sa ascultam */
-          }
-
-          // trimitere comanda la server
-          if (write (client, information, bytes) <= 0)
-          {
-              perror ("[server] Error at writting command for client.\n");
-              break; /* continuam sa ascultam */
-          }
-          else
-              printf("[server] Client has received the message.\n\n");
+          sendingInfo_SERVER(client, information);
         }
         else
         if(command == "Search")
         {
           printf ("[server] Client wants to add an app. \n");
 
-          char information[100];
-          bzero(information,100);
-          strcpy(information, "[testing] Applications have been found.");
+          string information;
+          information.clear();
+          information = "[testing] Applications have been found.";
 
-          printf ("[server] Sending back information... \n");
+          cout << "[server] Sending back information... \n";
 
-          int bytes = strlen(information) + 1;  // bytes de trimis la client
-
-          if (write (client, &bytes, sizeof(int)) <= 0)
-          {
-              perror ("[server] Error at writting num bytes for client.\n");
-              break; /* continuam sa ascultam */
-          }
-
-          // trimitere comanda la server
-          if (write (client, information, bytes) <= 0)
-          {
-              perror ("[server] Error at writting command for client.\n");
-              break; /* continuam sa ascultam */
-          }
-          else
-              printf("[server] Client has received the message.\n\n");
+          sendingInfo_SERVER(client, information);
         }
       }
-      /* am terminat cu acest client, inchidem conexiunea */
       close (client);
       exit(1);
     }
