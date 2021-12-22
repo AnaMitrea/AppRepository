@@ -62,35 +62,18 @@ int main ()
         cout << "[server] Waiting client to write command...\n";
         fflush (stdout);
 
-        int bytes_sent;
-        if (read (client, &bytes_sent, sizeof(int)) < 0) 
-        {
-            perror ("[server] Error at reading num bytes from client.\n");
-            close(client);
-            break;  // continuam sa ascultam
-        }
-
-        char command[bytes_sent];
-        bzero (command, MAXIMUM);
-
-        if (read (client, command, bytes_sent) < 0)
-        {
-            perror ("[server] Error at reading command from client.\n");
-            close(client);  
-            break;  // continuam sa ascultam
-        }
+        string command = readingCommand_SERVER(client);
         
-        command[strlen(command)] = '\0';
         cout << "[server] Command sent by client: \"" << command << "\"\n";
         
-        if(strcmp(command,"Disconnect") == 0)
+        if(command == "Disconnect")
         {
           printf ("[server] A client has disconnected from server. \n");
           close (client); 
           exit(1);
         }
         else
-        if(strcmp(command,"Insert") == 0)
+        if(command == "Insert")
         {
           cout << "[server] Client wants to add an app. \n";
 
@@ -118,7 +101,7 @@ int main ()
               printf("[server] Client has received the message.\n\n");
         }
         else
-        if(strcmp(command,"Search") == 0)
+        if(command == "Search")
         {
           printf ("[server] Client wants to add an app. \n");
 
