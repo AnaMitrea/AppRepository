@@ -1,4 +1,6 @@
-#include "libraries.h"
+#include "database.h"
+
+bool verifyingExistingName(sqlite3* db, string appName);
 
 static int callback(void* data, int argc, char** argv, char** azColName) //calback function used in sqlite
 {
@@ -118,11 +120,28 @@ string insertQuery(sqlite3* db, string sqlQuery)
     }
     else
     {
-        return "OK at inserting query";
+        return "\n[Inserting Query succeeded]\n";
     }
 }
 
-string insertValues_Application()
+bool verifyingExistingName(sqlite3* db, string appName) // searching existing AppName in db (returns true for already existing)
+{
+    string sqlQuery = "SELECT AppName FROM Application WHERE AppName=\"" + appName + "\";";
+    string sqlResponse; // sql query response for search existing appName in database
+    sqlResponse = selectQuery(db, sqlQuery);
+
+    if(sqlResponse.empty())
+        return false;
+    
+    string name = sqlResponse.substr(10,string::npos);
+    name = name.substr(0, name.length()-1);
+
+    if(name == appName)
+        return true;
+    return false;
+}
+
+string insertValues_Application(sqlite3* db)
 {
     string cinBuffer; // reading from stdin
     string insertInfo; // holds information about sql query for inserting in db
@@ -137,10 +156,21 @@ string insertValues_Application()
         cout << "Project Name: "; 
         getline(cin, cinBuffer);
     }
-    insertInfo = insertInfo + "\""+ cinBuffer + "\"";
+
+    string name = cinBuffer;
+    while(verifyingExistingName(db, name) == true)
+    {
+        name.clear();
+        cout << "Project name already exists. Choose another name." << endl;
+        cout << "Project Name: ";
+        getline(cin, name);
+    }
+
+    insertInfo = insertInfo + "\""+ name + "\"";
+    name.clear();
 
     // DEVELOPER
-    cinBuffer.clear(); //reset string
+    cinBuffer.clear();
     cout << "Developer: "; 
     getline(cin, cinBuffer);
 
@@ -540,6 +570,7 @@ int numberOfAppsFound(sqlite3* db, string sqlQuery)
     return num;
 }
 
+
 int main(int argc, char* argv[])
 {
     sqlite3* db;
@@ -570,7 +601,7 @@ int main(int argc, char* argv[])
     
     if(inputCommand == "Insert") // Insert app
     {
-        insertInfo = insertValues_Application();
+        insertInfo = insertValues_Application(db);
         sqlQuery.clear();
 
         sqlQuery = "INSERT INTO Application(AppName, Developer, Executable_name, License, Category, InternetConnection, AppInfo) VALUES(" + insertInfo + ");";
