@@ -639,9 +639,16 @@ int main(int argc, char* argv[])
         insertInfo.clear();
 
 
-        cout << "If you want to add more distributions, write ADD. If you don't want to, write STOP.\n";
+        cout << "If you want to add more distributions, write ADD. If you don't want to, write STOP.\nYour command: ";
         cinBuffer.clear();
         getline(cin, cinBuffer);
+
+        while(cinBuffer != "STOP" && cinBuffer != "ADD")
+        {
+            cout << "If you want to add more distributions, write ADD. If you don't want to, write STOP.\nYour command: ";
+            cinBuffer.clear();
+            getline(cin, cinBuffer);
+        }
         while(cinBuffer != "STOP")
         {
             cout << "OS distribution: "; 
