@@ -67,7 +67,7 @@ int main (int argc, char *argv[])
     }
     else
     {
-        cout << endl << command << "is an unavailable command. \n";
+        cout << endl << command << " is an unavailable command. \n";
         printInstructions();
         ok = 0;
     }
