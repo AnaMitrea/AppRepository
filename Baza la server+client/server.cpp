@@ -85,7 +85,6 @@ int main ()
         // connection ok, waiting msg
         cout << "[server] Waiting client to write command...\n";
         fflush (stdout);
-        // COMANDA PE CARE O TRIMITE CLIENTUL 
         string command = readingCommand_SERVER(client);
         
         cout << "[server] Command sent by client: \"" << command << "\"\n";
@@ -100,14 +99,48 @@ int main ()
         if(command == "Insert")
         {
           cout << "[server] Client wants to add an app in the database. \n";
+          insertInfo.clear();
 
-          string information;
-          information.clear();
-          information = "[testing] Application has been added successfully.";
+          string name = readingCommand_SERVER(client); // reading the appname
+
+          bool verif = verifyingExistingName(db, name);
+          if(verif == true)
+          {
+            while(verif == true)
+            {
+              cout << "The \"" << name << "\" is already in the database.\n";
+              sendingInfo_SERVER(client, "YES");
+              name.clear();
+              name = readingCommand_SERVER(client); // reading the appname
+              verif = verifyingExistingName(db, name);
+              if(verif == false)
+              {
+                sendingInfo_SERVER(client, "NO");
+                break;
+              }
+            }
+          }
+          else
+          {
+            sendingInfo_SERVER(client, "NO");
+          }
+
+
+
+          insertInfo = readingCommand_SERVER(client); // info from application table
+          sqlQuery.clear();
+
+          sqlQuery = "INSERT INTO Application(AppName, Developer, Executable_name, License, Category, InternetConnection, AppInfo) VALUES(" + insertInfo + ");";
+          sqlResponse = insertQuery(db, sqlQuery);
 
           cout << "[server] Sending back information... \n";
+          sendingInfo_SERVER(client, sqlResponse);
 
-          sendingInfo_SERVER(client, information);
+
+
+          
+
+          //sendingInfo_SERVER(client, sqlResponse);
         }
         else
         if(command == "Search")
@@ -135,7 +168,6 @@ int main ()
           {
             sendingInfo_SERVER(client, "Try entering other criteria.");
           }
-
 
           sqlQuery.clear();
           sqlResponse.clear();
