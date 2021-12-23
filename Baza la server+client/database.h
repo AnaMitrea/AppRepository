@@ -17,7 +17,7 @@ string selectQuery(sqlite3* db, string sqlQuery);
 string selectQuery_SEARCH(sqlite3* db, string sqlQuery);
 string insertQuery(sqlite3* db, string sqlQuery);
 bool verifyingExistingName(sqlite3* db, string appName);
-string insertValues_Application(sqlite3* db);
+string insertValues_Application(string name);
 string insertValues_Minimum_Req();
 string getAppID(sqlite3* db, string appName);
 string searchApps();
@@ -162,31 +162,10 @@ bool verifyingExistingName(sqlite3* db, string appName) // searching existing Ap
     return false;
 }
 
-string insertValues_Application(sqlite3* db)
+string insertValues_Application(string name)
 {
     string cinBuffer; // reading from stdin
     string insertInfo; // holds information about sql query for inserting in db
-
-    
-    cout << "Complete the following information about your application.\n";
-    cout << "Project Name: "; 
-    getline(cin, cinBuffer);
-    
-    while(cinBuffer.empty() == 1) 
-    {
-        cout << "Project Name field must be completed!" << endl;
-        cout << "Project Name: "; 
-        getline(cin, cinBuffer);
-    }
-
-    string name = cinBuffer;
-    while(verifyingExistingName(db, name) == true)
-    {
-        name.clear();
-        cout << "Project name already exists. Choose another name." << endl;
-        cout << "Project Name: ";
-        getline(cin, name);
-    }
 
     insertInfo = insertInfo + "\""+ name + "\"";
     name.clear();
