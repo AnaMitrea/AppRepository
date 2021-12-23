@@ -65,7 +65,6 @@ int main (int argc, char *argv[])
       cout << "Complete the following information about your application.\n";
       cout << "Project Name: "; 
       getline(cin, name);
-      cout << name << endl;
 
       bytes = name.length() + 1;
       sendingCommand_CLIENT(sd, bytes, name); // sending name for verifying it
@@ -111,7 +110,6 @@ int main (int argc, char *argv[])
           {
             errorHandling("[ERROR] Error at reading message from server.\n");
           }
-          cout << answer << endl;
 
           if(strcmp(answer,"NO") == 0)
           {
@@ -120,15 +118,39 @@ int main (int argc, char *argv[])
         }
       }
 
-
       insertInfo.clear();
       insertInfo = insertValues_Application(name);
-      cout << insertInfo << endl;
 
       bytes = insertInfo.length() + 1;
       sendingCommand_CLIENT(sd,bytes, insertInfo); // sending info from Application table
       
-      readingInfo_CLIENT(sd);
+      name.clear();
+      insertInfo.clear();
+      
+      cout << "\nOperating System details:\n";
+      cout << "OS distribution: "; 
+      getline(cin, name);
+
+      // trimitere nume distro
+      if(name.empty() == 1)
+      {
+        insertInfo = insertInfo + "\"-\"";
+      }
+      else
+      {
+        insertInfo = insertInfo + "\""+ name + "\"";
+      }
+
+      // sending the distro name
+      bytes = insertInfo.length() + 1;
+      sendingCommand_CLIENT(sd, bytes, insertInfo);
+      
+
+
+
+
+
+      readingInfo_CLIENT(sd); //Application inserted.
     }
     else
     if(command == "Search")
