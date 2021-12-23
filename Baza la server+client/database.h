@@ -383,12 +383,21 @@ string getAppID(sqlite3* db, string appName)
     }
     else
     {
-        data[strlen(data) - 1] = '\0';
+        data[strlen(data) - 1] = 0;
+        cout << "data:" << data << ",strlen="<< strlen(data);
         sqlQueryResult = data;
+        cout << sqlQueryResult;  // AppID = 25
+                                //  0123456789(10) ????
+        cout << "length="<< sqlQueryResult.length(); // 11
 
-        int position = sqlQueryResult.find("=");
-        string appID =sqlQueryResult.substr(position + 1, sqlQueryResult.length() - position);
+        int position = sqlQueryResult.find("=") + 2; //7
 
+        cout << "poz=" << position;
+
+        int lungime = sqlQueryResult.length() - 1 - position; //3
+        cout << "lungime=" << lungime;
+        string appID = sqlQueryResult.substr(position + 1, lungime);
+        cout << "appid=" << appID;
         return appID;
     }
 } 
