@@ -2,6 +2,24 @@
 
 int main ()
 {
+  sqlite3* db;
+  int database = sqlite3_open("SoftwareApp.db", &db);
+
+  if (database)
+  {
+      cout << "Error: " << sqlite3_errmsg (db) << endl;
+      return 0;
+  }
+  else
+  {
+      cout << "Database connected succesfully...\n";
+  }
+
+  string searchInfo; // holds information about sql query for searching db with criteria
+  string insertInfo; // holds information about sql query for inserting in db
+  string sqlQuery; // sql query to be executed
+  string sqlResponse; // sql query response
+
   struct sockaddr_in server;	// structure used by server
   struct sockaddr_in from;	
   int sd;
@@ -48,7 +66,7 @@ int main ()
 
     if (client < 0)
     {
-      perror ("[server] Eroare la accept().\n");
+      perror ("[server] Erorr accept().\n");
       continue;
     }
 
@@ -61,7 +79,7 @@ int main ()
         // connection ok, waiting msg
         cout << "[server] Waiting client to write command...\n";
         fflush (stdout);
-
+        // COMANDA PE CARE O TRIMITE CLIENTUL 
         string command = readingCommand_SERVER(client);
         
         cout << "[server] Command sent by client: \"" << command << "\"\n";
@@ -75,7 +93,7 @@ int main ()
         else
         if(command == "Insert")
         {
-          cout << "[server] Client wants to add an app. \n";
+          cout << "[server] Client wants to add an app in the database. \n";
 
           string information;
           information.clear();
@@ -88,15 +106,26 @@ int main ()
         else
         if(command == "Search")
         {
-          printf ("[server] Client wants to add an app. \n");
+          cout << "[server] Client wants to search an app. \n";
 
-          string information;
-          information.clear();
-          information = "[testing] Applications have been found.";
+          sqlQuery.clear();
+          searchInfo.clear();
 
-          cout << "[server] Sending back information... \n";
+          searchInfo = readingCommand_SERVER(client); // search criteria
+          sqlQuery = "SELECT COUNT(DISTINCT AppName) FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
 
-          sendingInfo_SERVER(client, information);
+          string appsFound = numberOfAppsFound(db, sqlQuery);
+          string found = "Found " + appsFound + " programs for the criteria. \n\n";
+          sendingInfo_SERVER(client, found); // sending the number of apps found
+
+          sqlQuery.clear();
+          sqlQuery = "SELECT * FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
+          sqlResponse = selectQuery_SEARCH(db, sqlQuery);
+          sendingInfo_SERVER(client, sqlResponse); //sending all the apps which have the criteria
+
+          sqlQuery.clear();
+          sqlResponse.clear();
+          searchInfo.clear();
         }
       }
       close (client);
