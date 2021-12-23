@@ -63,7 +63,21 @@ int main (int argc, char *argv[])
     if(command == "Search")
     {
       int bytes = strlen("Search") + 1;
-      sendingCommand_CLIENT(sd, bytes, command);
+      sendingCommand_CLIENT(sd, bytes, command); // sending written command
+
+      string availableCriteria = "\nCriteria available:\n- App's Name\n- Developer\n- License\n- Category\n- Internet Connection\n- Operating System\n- CPU\n- RAM\n- Hard Disk Storage\n\n";
+      cout << availableCriteria;
+
+      string searchInfo; // holds information about sql query for searching db with criteria
+      searchInfo.clear();
+      searchInfo = searchApps();
+
+      bytes = searchInfo.length() + 1;
+      sendingCommand_CLIENT(sd, bytes, searchInfo); // sending information about the search criteria
+
+      readingInfo_CLIENT(sd); // reading the number of apps found
+      readingInfo_CLIENT(sd); // reading all the apps
+
     }
     else
     {
@@ -72,9 +86,5 @@ int main (int argc, char *argv[])
         ok = 0;
     }
 
-    if(ok == 1)
-    {
-      readingInfo_CLIENT(sd);
-    }
   }
 }
