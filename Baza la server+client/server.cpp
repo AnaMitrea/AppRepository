@@ -43,6 +43,12 @@ int main ()
   server.sin_addr.s_addr = htonl (INADDR_ANY); // any address
   server.sin_port = htons (PORT); // Connection port
   
+  int enable = 1;
+  if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+  {
+    errorHandling("setsockopt(SO_REUSEADDR) failed.\n");
+  }
+
   if (bind (sd, (struct sockaddr *) &server, sizeof (struct sockaddr)) == -1)
   {
     errorHandling("[server]Error bind().\n");
@@ -115,13 +121,21 @@ int main ()
           sqlQuery = "SELECT COUNT(DISTINCT AppName) FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
 
           string appsFound = numberOfAppsFound(db, sqlQuery);
-          string found = "Found " + appsFound + " programs for the criteria. \n\n";
+          string found = "Found " + appsFound + " programs for the criteria.";
           sendingInfo_SERVER(client, found); // sending the number of apps found
 
-          sqlQuery.clear();
-          sqlQuery = "SELECT * FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
-          sqlResponse = selectQuery_SEARCH(db, sqlQuery);
-          sendingInfo_SERVER(client, sqlResponse); //sending all the apps which have the criteria
+          if(appsFound != "0")
+          {
+            sqlQuery.clear();
+            sqlQuery = "SELECT * FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
+            sqlResponse = selectQuery_SEARCH(db, sqlQuery);
+            sendingInfo_SERVER(client, sqlResponse); //sending all the apps which have the criteria
+          }
+          else
+          {
+            sendingInfo_SERVER(client, "Try entering other criteria.");
+          }
+
 
           sqlQuery.clear();
           sqlResponse.clear();
