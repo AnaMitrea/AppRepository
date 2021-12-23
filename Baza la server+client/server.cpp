@@ -109,12 +109,14 @@ int main ()
             while(verif == true)
             {
               cout << "The \"" << name << "\" is already in the database.\n";
+              cout << "[server] Sending back information... \n";
               sendingInfo_SERVER(client, "YES");
               name.clear();
               name = readingCommand_SERVER(client); // reading the appname
               verif = verifyingExistingName(db, name);
               if(verif == false)
               {
+                cout << "[server] Sending back information... \n";
                 sendingInfo_SERVER(client, "NO");
                 break;
               }
@@ -124,23 +126,38 @@ int main ()
           {
             sendingInfo_SERVER(client, "NO");
           }
+          string appName = name;
 
-
-
+          // inserting in Application Table
           insertInfo = readingCommand_SERVER(client); // info from application table
           sqlQuery.clear();
 
           sqlQuery = "INSERT INTO Application(AppName, Developer, Executable_name, License, Category, InternetConnection, AppInfo) VALUES(" + insertInfo + ");";
           sqlResponse = insertQuery(db, sqlQuery);
+          cout << sqlResponse << endl;
+          sqlResponse.clear();
+          sqlQuery.clear();
 
-          cout << "[server] Sending back information... \n";
-          sendingInfo_SERVER(client, sqlResponse);
 
+          string appID = getAppID(db, appName);
+          cout << appID;
+          insertInfo.clear();
+          appID.clear();
 
+          insertInfo = readingCommand_SERVER(client); // distro name to be insertedd in OS
+          cout << "insertInfo=" << insertInfo << endl;
+
+          sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + "," + insertInfo + ");";
+          sqlResponse = insertQuery(db, sqlQuery);
+          cout << sqlResponse << endl;
+          sqlResponse.clear();
 
           
 
-          //sendingInfo_SERVER(client, sqlResponse);
+
+          sqlResponse = "\nApplication inserted.\n";
+          cout << "[server] Sending back information... \n";
+          sendingInfo_SERVER(client, sqlResponse);
         }
         else
         if(command == "Search")
