@@ -10,7 +10,6 @@ using namespace std;
 #define maxi 100000 // maximum length for data array in callback function
 #define MAXIMUM 1024
 
-
 static int callback(void* data, int argc, char** argv, char** azColName);
 static int callback_SEARCH(void* data, int argc, char** argv, char** azColName);
 string selectQuery(sqlite3* db, string sqlQuery);
@@ -45,7 +44,6 @@ static int callback(void* data, int argc, char** argv, char** azColName) //calba
         }
         strcat(information,"\n");
     }
-    strcat(information, "\n");
     return 0;
 }
 
@@ -74,7 +72,6 @@ static int callback_SEARCH(void* data, int argc, char** argv, char** azColName) 
             strcat(information,"\n");
         }
     }
-    strcat(information, "\n");
     return 0;
 }
 
@@ -371,7 +368,9 @@ string getAppID(sqlite3* db, string appName)
     sqlQueryResult.clear();
     data[0] = 0;
 
-    string sqlQuery = "SELECT AppID FROM Application WHERE AppName = \"" + appName + "\";";
+    string sqlQuery;
+    sqlQuery.clear();
+    sqlQuery =  "SELECT AppID FROM Application WHERE AppName = \"" + appName + "\";";
 
     int sqlExec = sqlite3_exec(db, sqlQuery.c_str(), callback, data, &SQL_errorMessage);
     if (sqlExec != SQLITE_OK)
@@ -383,21 +382,12 @@ string getAppID(sqlite3* db, string appName)
     }
     else
     {
-        data[strlen(data) - 1] = 0;
-        cout << "data:" << data << ",strlen="<< strlen(data);
+        data[strlen(data) - 1] = '\0';
         sqlQueryResult = data;
-        cout << sqlQueryResult;  // AppID = 25
-                                //  0123456789(10) ????
-        cout << "length="<< sqlQueryResult.length(); // 11
 
-        int position = sqlQueryResult.find("=") + 2; //7
+        int position = sqlQueryResult.find("=") + 1;
+        string appID =sqlQueryResult.substr(position + 1, sqlQueryResult.length() - position);
 
-        cout << "poz=" << position;
-
-        int lungime = sqlQueryResult.length() - 1 - position; //3
-        cout << "lungime=" << lungime;
-        string appID = sqlQueryResult.substr(position + 1, lungime);
-        cout << "appid=" << appID;
         return appID;
     }
 } 

@@ -139,20 +139,16 @@ int main ()
           sqlQuery.clear();
 
 
-          string appID = getAppID(db, appName);
-          cout << appID;
+          string appID = getAppID(db,appName);
           insertInfo.clear();
-          appID.clear();
-
           insertInfo = readingCommand_SERVER(client); // distro name to be insertedd in OS
-          cout << "insertInfo=" << insertInfo << endl;
 
           sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + "," + insertInfo + ");";
           sqlResponse = insertQuery(db, sqlQuery);
           cout << sqlResponse << endl;
           sqlResponse.clear();
 
-          
+
 
 
           sqlResponse = "\nApplication inserted.\n";

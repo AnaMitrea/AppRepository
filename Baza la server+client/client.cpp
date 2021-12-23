@@ -126,7 +126,7 @@ int main (int argc, char *argv[])
       
       name.clear();
       insertInfo.clear();
-      
+
       cout << "\nOperating System details:\n";
       cout << "OS distribution: "; 
       getline(cin, name);
@@ -144,10 +144,8 @@ int main (int argc, char *argv[])
       // sending the distro name
       bytes = insertInfo.length() + 1;
       sendingCommand_CLIENT(sd, bytes, insertInfo);
+      insertInfo.clear();
       
-
-
-
 
 
       readingInfo_CLIENT(sd); //Application inserted.
@@ -175,7 +173,6 @@ int main (int argc, char *argv[])
     else
     {
         cout << endl << command << " is an unavailable command. \n";
-        printInstructions();
         ok = 0;
     }
 
