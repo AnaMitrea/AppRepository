@@ -586,7 +586,8 @@ string numberOfAppsFound(sqlite3* db, string sqlQuery)
     string sqlResponse; // sql query response
     sqlResponse = selectQuery_SEARCH(db, sqlQuery);
 
-    string nr = sqlResponse.substr(25,string::npos);
+    string nr = sqlResponse.substr(26,string::npos);
     nr = nr.substr(0,nr.length() - 1);
     return nr;
 }
+
