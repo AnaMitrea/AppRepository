@@ -32,10 +32,9 @@ int main (int argc, char *argv[])
     errorHandling("[client] Error connect().\n");
   }
 
-  printInstructions();
-
   while(1)
   {
+    printInstructions();
     int ok = 1;
 
     command.clear();
@@ -56,8 +55,80 @@ int main (int argc, char *argv[])
     else
     if(command == "Insert")
     {
+      string insertInfo; // holds information about sql query for inserting in db
+      insertInfo.clear();
+
       int bytes = strlen("Insert") + 1;
       sendingCommand_CLIENT(sd, bytes, command);
+
+      string name;
+      cout << "Complete the following information about your application.\n";
+      cout << "Project Name: "; 
+      getline(cin, name);
+      cout << name << endl;
+
+      bytes = name.length() + 1;
+      sendingCommand_CLIENT(sd, bytes, name); // sending name for verifying it
+      
+      // reading the answer YES or NO
+      int bytes_sent;
+      if (read (sd, &bytes_sent, sizeof(int)) < 0)
+      {
+        errorHandling("[ERROR] Error at reading num bytes from server.\n");
+      }
+
+      char answer[bytes_sent];
+      bzero(answer, bytes_sent);
+
+      if (read (sd, answer, bytes_sent) < 0)
+      {
+        errorHandling("[ERROR] Error at reading message from server.\n");
+      }
+
+      if(strcmp(answer,"YES") == 0)
+      {
+        while(strcmp(answer,"YES") == 0) // name already exists?
+        {
+          name.clear();
+          cout << "Project name already exists. Choose another name." << endl;
+          cout << "Project Name: ";
+          getline(cin, name);
+
+          bytes = name.length() + 1;
+          sendingCommand_CLIENT(sd, bytes, name); // sending name for verifying it
+          
+          // reading the answer YES or NO
+          bytes_sent = -1;
+          if (read (sd, &bytes_sent, sizeof(int)) < 0)
+          {
+            errorHandling("[ERROR] Error at reading num bytes from server.\n");
+          }
+
+          char answer[bytes_sent];
+          bzero(answer, bytes_sent);
+
+          if (read (sd, answer, bytes_sent) < 0)
+          {
+            errorHandling("[ERROR] Error at reading message from server.\n");
+          }
+          cout << answer << endl;
+
+          if(strcmp(answer,"NO") == 0)
+          {
+            break;
+          }
+        }
+      }
+
+
+      insertInfo.clear();
+      insertInfo = insertValues_Application(name);
+      cout << insertInfo << endl;
+
+      bytes = insertInfo.length() + 1;
+      sendingCommand_CLIENT(sd,bytes, insertInfo); // sending info from Application table
+      
+      readingInfo_CLIENT(sd);
     }
     else
     if(command == "Search")
