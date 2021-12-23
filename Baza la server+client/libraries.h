@@ -1,5 +1,7 @@
 #pragma once
+#include "database.h"
 
+#include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
@@ -13,13 +15,6 @@
 #include <string.h>
 #include <signal.h>
 #include <errno.h>
-#include <string>
-#include <iostream>
-using namespace std;
-
-// CLIENT+SERVER FUNCTIONS
-#define MAXIMUM 1024
-
 
 // CLIENT FUNCTIONS
 int errorHandling(string errmsg);
@@ -27,12 +22,11 @@ void printInstructions();
 void readingInfo_CLIENT(int sd);
 void sendingCommand_CLIENT(int sd, int bytes, string command);
 
-
 // SERVER FUNCTIONS
 #define PORT 2024
 void sighandler();
-string readingCommand_SERVER(int client, int bytes);
-void readingInfo_SERVER(int sd);
+string readingCommand_SERVER(int client);
+void sendingInfo_SERVER(int sd);
 int numBytesSent(int client);
 
 
@@ -71,7 +65,6 @@ void sendingCommand_CLIENT(int sd, int bytes, string command)
 void readingInfo_CLIENT(int sd)
 {
   int bytes_sent;
-  // citirea raspunsului dat de server (apel blocant pana cand serverul raspunde)
   if (read (sd, &bytes_sent, sizeof(int)) < 0)
   {
     errorHandling("[ERROR] Error at reading num bytes from server.\n");
@@ -84,8 +77,6 @@ void readingInfo_CLIENT(int sd)
   {
     errorHandling("[ERROR] Error at reading message from server.\n");
   }
-
-  information[strlen(information)] = '\0';
 
   cout << "[MSG received] " << information << endl;
 }
@@ -103,7 +94,7 @@ int numBytesSent(int client)
   return bytes_sent;
 }
 
-string readingCommand_SERVER(int client, int bytes)
+string readingCommand_SERVER(int client)
 {
   int bytes_sent = numBytesSent(client);
   if(bytes_sent == -1)
@@ -119,13 +110,36 @@ string readingCommand_SERVER(int client, int bytes)
       close(client);  
       exit(1);
   }
-  information[strlen(information)] = '\0';
 
   string info = information;
-
-  cout << "Informatia de la client in server: " << info << endl; 
-
   return info;
 }
+
+void sendingInfo_SERVER(int client, string information)
+{
+  int bytes = information.length() + 1;
+
+  if (write (client, &bytes, sizeof(int)) <= 0)
+  {
+      perror ("[server] Error at writting num bytes for client.\n");
+      close(client);  
+      exit(1);
+  }
+
+  // trimitere comanda la server
+  if (write (client, information.c_str(), bytes) <= 0)
+  {
+      perror ("[server] Error at writting command for client.\n");
+      close(client);  
+      exit(1);
+  }
+  else
+      cout << "[server] Client has received the message.\n\n";
+}
+
+
+
+
+
 
 
