@@ -44,6 +44,7 @@ static int callback(void* data, int argc, char** argv, char** azColName) //calba
         }
         strcat(information,"\n");
     }
+    strcat(information,"\n");
     return 0;
 }
 
