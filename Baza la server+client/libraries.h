@@ -137,3 +137,6 @@ void sendingInfo_SERVER(int client, string information)
       cout << "[server] Client has received the message.\n";
 }
 
+
+
+
