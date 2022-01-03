@@ -181,6 +181,14 @@ int main (int argc, char *argv[])
         name.clear();
       }
 
+      cout << "Minimum requirements for the application:\n";
+      insertInfo.clear();
+      insertInfo = insertValues_Minimum_Req();
+
+      bytes = insertInfo.length() + 1;
+      sendingCommand_CLIENT(sd,bytes, insertInfo); // sending info from Minimum_Req table
+      insertInfo.clear();
+
 
       readingInfo_CLIENT(sd); //Application inserted.
     }
