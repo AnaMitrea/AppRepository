@@ -166,6 +166,7 @@ int main (int argc, char *argv[])
       bytes = searchInfo.length() + 1;
       sendingCommand_CLIENT(sd, bytes, searchInfo); // sending information about the search criteria
 
+      
       readingInfo_CLIENT(sd); // reading the number of apps found
       readingInfo_CLIENT(sd); // reading all the apps
 
