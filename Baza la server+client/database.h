@@ -72,6 +72,7 @@ static int callback_SEARCH(void* data, int argc, char** argv, char** azColName) 
             strcat(information,"\n");
         }
     }
+    strcat(information,"\n");
     return 0;
 }
 
@@ -554,7 +555,8 @@ string searchApps()
     cinBuffer.clear();
 
     cout << endl;
-
+    searchInfo = searchInfo.substr(0,searchInfo.length() - 1);
+    
     return searchInfo;
 
 }
@@ -564,8 +566,11 @@ string numberOfAppsFound(sqlite3* db, string sqlQuery)
     string sqlResponse; // sql query response
     sqlResponse = selectQuery_SEARCH(db, sqlQuery);
 
-    string nr = sqlResponse.substr(26,string::npos);
-    nr = nr.substr(0,nr.length() - 1);
-    return nr;
+    string nrstring = sqlResponse.substr(26,string::npos);
+    nrstring = nrstring.substr(0,nrstring.length() - 1);
+
+    cout << "nrstring=\"" << nrstring << "\"" << endl;
+
+    return nrstring;
 }
 
