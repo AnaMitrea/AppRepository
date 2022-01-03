@@ -78,7 +78,7 @@ void readingInfo_CLIENT(int sd)
     errorHandling("[ERROR] Error at reading message from server.\n");
   }
 
-  cout << "[MSG received] " << information;
+  cout << information << endl;
 }
 
 int numBytesSent(int client)
