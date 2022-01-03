@@ -86,6 +86,12 @@ int main ()
         cout << "[server] Waiting client to write command...\n";
         fflush (stdout);
         string command = readingCommand_SERVER(client);
+        if(command.empty())
+        {
+          printf ("[server] A client has lost connection from the server. \n");
+          close (client); 
+          exit(1);
+        }
         
         cout << "[server] Command sent by client: \"" << command << "\"\n";
         
@@ -164,23 +170,36 @@ int main ()
           searchInfo.clear();
 
           searchInfo = readingCommand_SERVER(client); // search criteria
-          sqlQuery = "SELECT COUNT(DISTINCT AppName) FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
-
-          string appsFound = numberOfAppsFound(db, sqlQuery);
-          string found = "Found " + appsFound + " programs for the criteria.";
-          sendingInfo_SERVER(client, found); // sending the number of apps found
-
-          if(appsFound != "0")
+          cout << "Search criteria: \"" <<  searchInfo << "\"." << endl;
+          
+          if(searchInfo.empty() == 0) // nu e empty
           {
-            sqlQuery.clear();
-            sqlQuery = "SELECT * FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
-            sqlResponse = selectQuery_SEARCH(db, sqlQuery);
-            sendingInfo_SERVER(client, sqlResponse); //sending all the apps which have the criteria
+            sqlQuery = "SELECT COUNT(DISTINCT AppName) FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
+
+            string appsFound = numberOfAppsFound(db, sqlQuery);
+            string found = "Found " + appsFound + " programs for the criteria.";
+            sendingInfo_SERVER(client, found); // sending the number of apps found
+
+            if(appsFound != "0")
+            {
+              sqlQuery.clear();
+              sqlQuery = "SELECT * FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
+              sqlResponse = selectQuery_SEARCH(db, sqlQuery);
+              sendingInfo_SERVER(client, sqlResponse); //sending all the apps which have the criteria
+            }
+            else
+            {
+              sendingInfo_SERVER(client, "Try entering other criteria.");
+            }
           }
           else
           {
-            sendingInfo_SERVER(client, "Try entering other criteria.");
+            sendingInfo_SERVER(client, "Found 0 programs.");
+            sendingInfo_SERVER(client, "No criteria entered.");
           }
+          
+         
+
 
           sqlQuery.clear();
           sqlResponse.clear();
