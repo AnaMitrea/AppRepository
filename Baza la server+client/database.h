@@ -260,9 +260,6 @@ string insertValues_Minimum_Req()
     string cinBuffer; // reading from stdin
     string insertInfo; // holds information about sql query for inserting in db
 
-    int ok = 0;
-
-    cout << "Minimum requirements for the application:\n";
     cout << "CPU (GHz): "; 
     getline(cin, cinBuffer);
 
@@ -273,35 +270,20 @@ string insertValues_Minimum_Req()
     else
     {
         insertInfo = insertInfo + cinBuffer;
-        ok = 1;
     }
 
     cinBuffer.clear();
     cout << "GPU: "; 
     getline(cin, cinBuffer);
 
-    if(ok == 1)
+
+    if(cinBuffer.empty() == 1)
     {
-        if(cinBuffer.empty() == 1)
-        {
-            insertInfo = insertInfo + ",\"-\"";
-        }
-        else
-        {
-            insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
-        }
+        insertInfo = insertInfo + ",\"-\"";
     }
     else
     {
-        if(cinBuffer.empty() == 1)
-        {
-            insertInfo = insertInfo + "-1";
-        }
-        else
-        {
-            insertInfo = insertInfo + cinBuffer;
-            ok = 1;
-        }
+        insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
     }
 
 
@@ -309,57 +291,28 @@ string insertValues_Minimum_Req()
     cout << "RAM (GB): "; 
     getline(cin, cinBuffer);
 
-    if(ok == 1)
+    if(cinBuffer.empty() == 1)
     {
-        if(cinBuffer.empty() == 1)
-        {
-            insertInfo = insertInfo + ",-1";
-        }
-        else
-        {
-            insertInfo = insertInfo + ","+ cinBuffer;
-        }
+        insertInfo = insertInfo + ",-1";
     }
     else
     {
-        if(cinBuffer.empty() == 1)
-        {
-            insertInfo = insertInfo + "-1";
-        }
-        else
-        {
-            insertInfo = insertInfo + cinBuffer;
-            ok = 1;
-        }
+        insertInfo = insertInfo + ","+ cinBuffer;
     }
 
     cinBuffer.clear();
     cout << "Hard Disk Storage (GB): "; 
     getline(cin, cinBuffer);
 
-    if(ok == 1)
+    if(cinBuffer.empty() == 1)
     {
-        if(cinBuffer.empty() == 1)
-        {
-            insertInfo = insertInfo + ",-1";
-        }
-        else
-        {
-            insertInfo = insertInfo + ","+ cinBuffer;
-        }
+        insertInfo = insertInfo + ",-1";
     }
     else
     {
-        if(cinBuffer.empty() == 1)
-        {
-            insertInfo = insertInfo + "-1";
-        }
-        else
-        {
-            insertInfo = insertInfo+ cinBuffer;
-        }
+        insertInfo = insertInfo + ","+ cinBuffer;
     }
-
+    
     return insertInfo;
 }
 
