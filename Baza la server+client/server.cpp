@@ -139,6 +139,7 @@ int main ()
           sqlQuery.clear();
 
           sqlQuery = "INSERT INTO Application(AppName, Developer, Executable_name, License, Category, InternetConnection, AppInfo) VALUES(" + insertInfo + ");";
+          cout << "Application table- interogare: " << sqlQuery << endl;
           sqlResponse = insertQuery(db, sqlQuery);
           cout << sqlResponse; // Inserting Query succeeded or not
           sqlResponse.clear();
@@ -151,6 +152,7 @@ int main ()
           insertInfo = readingCommand_SERVER(client); // distro name to be inserted in OS
 
           sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + "," + insertInfo + ");";
+          cout << "OS table- interogare: " << sqlQuery << endl;
           sqlResponse = insertQuery(db, sqlQuery);
           cout << sqlResponse << endl; // Inserting Query succeeded or not
           sqlResponse.clear();
@@ -163,15 +165,25 @@ int main ()
             insertInfo = readingCommand_SERVER(client); // distro name to be inserted in OS
 
             sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + "," + insertInfo + ");";
+            cout << "Min_req table- interogare: " << sqlQuery << endl;
             sqlResponse = insertQuery(db, sqlQuery);
             cout << sqlResponse << endl; // Inserting Query succeeded or not
             sqlResponse.clear();
           }
-          
+          add_stop.clear();
     // Inserting in Minimum_req table
-      
 
+          insertInfo.clear();
+          sqlQuery.clear();
+          sqlResponse.clear();
 
+          insertInfo.clear();
+          insertInfo = readingCommand_SERVER(client); // info to be inserted in Minimum_Req Table
+          cout << "Application table- info: " << insertInfo << endl;
+          sqlQuery = "INSERT INTO Minimum_Req(AppID,GHzCPU, GPU, GB_RAM, GB_HDStorage) VALUES(" + appID + "," + insertInfo + ");";
+          sqlResponse = insertQuery(db, sqlQuery);
+          cout << sqlResponse << endl; // Inserting Query succeeded or not
+          sqlResponse.clear();
 
 
           sqlResponse = "\nApplication inserted.\n";
@@ -194,7 +206,7 @@ int main ()
             sqlQuery = "SELECT COUNT(DISTINCT AppName) FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
 
             string appsFound = numberOfAppsFound(db, sqlQuery);
-            string found = "Found " + appsFound + " programs for the criteria.";
+            string found = "[Found " + appsFound + " programs for the written criteria]";
             sendingInfo_SERVER(client, found); // sending the number of apps found
 
             if(appsFound != "0")
