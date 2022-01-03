@@ -67,7 +67,7 @@ int main (int argc, char *argv[])
       getline(cin, name);
 
       bytes = name.length() + 1;
-      sendingCommand_CLIENT(sd, bytes, name); // sending name for verifying it
+      sendingCommand_CLIENT(sd, bytes, name); // sending name for verifying it (YES/NO)
       
       // reading the answer YES or NO
       int bytes_sent;
@@ -145,7 +145,41 @@ int main (int argc, char *argv[])
       bytes = insertInfo.length() + 1;
       sendingCommand_CLIENT(sd, bytes, insertInfo);
       insertInfo.clear();
+      name.clear();
       
+      cout << "To add one more distribution, write \"ADD\", otherwise write \"STOP\"\nYour command: ";
+      getline(cin, name);
+      if(name == "ADD")
+      {
+        bytes = name.length() + 1;
+        sendingCommand_CLIENT(sd, bytes, name); // sending ADD
+        name.clear();
+
+        cout << "OS distribution: "; 
+        getline(cin, name);
+
+        // trimitere nume distro
+        if(name.empty() == 1)
+        {
+          insertInfo = insertInfo + "\"-\"";
+        }
+        else
+        {
+          insertInfo = insertInfo + "\""+ name + "\"";
+        }
+
+        // sending the distro name
+        bytes = insertInfo.length() + 1;
+        sendingCommand_CLIENT(sd, bytes, insertInfo);
+        insertInfo.clear();
+        name.clear();
+      }
+      else
+      {
+        bytes = name.length() + 1;
+        sendingCommand_CLIENT(sd, bytes, name); // sending STOP
+        name.clear();
+      }
 
 
       readingInfo_CLIENT(sd); //Application inserted.
@@ -166,7 +200,6 @@ int main (int argc, char *argv[])
       bytes = searchInfo.length() + 1;
       sendingCommand_CLIENT(sd, bytes, searchInfo); // sending information about the search criteria
 
-      
       readingInfo_CLIENT(sd); // reading the number of apps found
       readingInfo_CLIENT(sd); // reading all the apps
 
