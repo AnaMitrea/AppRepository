@@ -134,25 +134,42 @@ int main ()
           }
           string appName = name;
 
-          // inserting in Application Table
+    // inserting in Application Table
           insertInfo = readingCommand_SERVER(client); // info from application table
           sqlQuery.clear();
 
           sqlQuery = "INSERT INTO Application(AppName, Developer, Executable_name, License, Category, InternetConnection, AppInfo) VALUES(" + insertInfo + ");";
           sqlResponse = insertQuery(db, sqlQuery);
-          cout << sqlResponse << endl;
+          cout << sqlResponse; // Inserting Query succeeded or not
           sqlResponse.clear();
           sqlQuery.clear();
 
 
+    // inserting in OS Table
           string appID = getAppID(db,appName);
           insertInfo.clear();
-          insertInfo = readingCommand_SERVER(client); // distro name to be insertedd in OS
+          insertInfo = readingCommand_SERVER(client); // distro name to be inserted in OS
 
           sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + "," + insertInfo + ");";
           sqlResponse = insertQuery(db, sqlQuery);
-          cout << sqlResponse << endl;
+          cout << sqlResponse << endl; // Inserting Query succeeded or not
           sqlResponse.clear();
+
+          string add_stop = readingCommand_SERVER(client);
+
+          if(add_stop == "ADD")
+          {
+            insertInfo.clear();
+            insertInfo = readingCommand_SERVER(client); // distro name to be inserted in OS
+
+            sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + "," + insertInfo + ");";
+            sqlResponse = insertQuery(db, sqlQuery);
+            cout << sqlResponse << endl; // Inserting Query succeeded or not
+            sqlResponse.clear();
+          }
+          
+    // Inserting in Minimum_req table
+      
 
 
 
