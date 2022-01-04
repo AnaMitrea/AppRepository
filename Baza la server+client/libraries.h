@@ -7,19 +7,17 @@
 #include <sys/wait.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <errno.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <netdb.h>
 #include <string.h>
 #include <signal.h>
-#include <errno.h>
 
 // CLIENT FUNCTIONS
-int errorHandling(string errmsg);
+void errorHandling(string errmsg);
 void printInstructions();
-void readingInfo_CLIENT(int sd);
+string readingInfo_CLIENT(int sd);
 void sendingCommand_CLIENT(int sd, int bytes, string command);
 
 // SERVER FUNCTIONS
@@ -30,10 +28,9 @@ void sendingInfo_SERVER(int sd);
 int numBytesSent(int client);
 
 
-int errorHandling(string errmsg)
+void errorHandling(string errmsg)
 {
-  perror(errmsg.c_str());
-  return errno;
+  cout << errmsg.c_str();
 }
 
 void sighandler()
@@ -62,34 +59,35 @@ void sendingCommand_CLIENT(int sd, int bytes, string command)
   }
 }
 
-void readingInfo_CLIENT(int sd)
+string readingInfo_CLIENT(int sd)
 {
   int bytes_sent;
-  if (read (sd, &bytes_sent, sizeof(int)) < 0)
+  if (read (sd, &bytes_sent, sizeof(int)) <= 0)
   {
     errorHandling("[ERROR] Error at reading num bytes from server.\n");
+    return "ERROR!";
   }
 
   char information[bytes_sent];
   bzero(information, bytes_sent);
 
-  if (read (sd, information, bytes_sent) < 0)
+  if (read (sd, information, bytes_sent) <= 0)
   {
     errorHandling("[ERROR] Error at reading message from server.\n");
+    return "ERROR!";
   }
-
-  cout << information << endl;
+  string str = information;
+  return str;
 }
 
 int numBytesSent(int client)
 {
   int bytes_sent;
-  if (read (client, &bytes_sent, sizeof(int)) < 0) 
+  if (read (client, &bytes_sent, sizeof(int)) <= 0) 
   {
-      perror ("[server] Error at reading num bytes from client.\n");
-      close(client);
-      exit(1);
-      return -1;
+    cout << "[server] Error at reading num bytes from client.\n";
+    close(client);
+    exit(1);
   }
   return bytes_sent;
 }
@@ -97,18 +95,13 @@ int numBytesSent(int client)
 string readingCommand_SERVER(int client)
 {
   int bytes_sent = numBytesSent(client);
-  if(bytes_sent == -1)
-  {
-    errorHandling("[server] Error: -1 Bytes received.\n");
-  }
   char information[bytes_sent];
   bzero (information, bytes_sent);
 
-  if (read (client, information, bytes_sent) < 0)
+  if (read (client, information, bytes_sent) <= 0)
   {
-      perror ("[server] Error at reading command from client.\n");
-      close(client);  
-      exit(1);
+    cout << "[server] Error at reading command from client.\n";
+    return "ERROR!";
   }
 
   string info = information;
@@ -121,7 +114,7 @@ void sendingInfo_SERVER(int client, string information)
 
   if (write (client, &bytes, sizeof(int)) <= 0)
   {
-      perror ("[server] Error at writting num bytes for client.\n");
+      cout << "[server] Error at writting num bytes for client.\n";
       close(client);  
       exit(1);
   }
@@ -129,14 +122,12 @@ void sendingInfo_SERVER(int client, string information)
   // trimitere comanda la server
   if (write (client, information.c_str(), bytes) <= 0)
   {
-      perror ("[server] Error at writting command for client.\n");
+      cout << "[server] Error at writting command for client.\n";
       close(client);  
       exit(1);
   }
   else
       cout << "[server] Client has received the message.\n";
 }
-
-
 
 
