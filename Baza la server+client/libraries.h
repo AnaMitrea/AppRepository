@@ -1,133 +1,258 @@
-#pragma once
-#include "database.h"
-
-#include <string>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/wait.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <netdb.h>
-#include <string.h>
-#include <signal.h>
-
-// CLIENT FUNCTIONS
-void errorHandling(string errmsg);
-void printInstructions();
-string readingInfo_CLIENT(int sd);
-void sendingCommand_CLIENT(int sd, int bytes, string command);
-
-// SERVER FUNCTIONS
-#define PORT 2024
-void sighandler();
-string readingCommand_SERVER(int client);
-void sendingInfo_SERVER(int sd);
-int numBytesSent(int client);
+#include "libraries.h"
+int port;
 
 
-void errorHandling(string errmsg)
+int main (int argc, char *argv[])
 {
-  cout << errmsg.c_str();
-}
+  int sd;
+  struct sockaddr_in server;
+  string command;		// input command
 
-void sighandler()
-{
-  while(waitpid(-1, NULL, WNOHANG) > 0);
-}
-
-void printInstructions()
-{
-  cout << "\nAvailable commands on the server: \n";
-  cout << "[1] To insert your Application, please write \"Insert\". \n";
-  cout << "[2] To search an Application, please write \"Search\". \n";
-  cout << "[3] To Disconnect from the server, please write \"Disconnect\". \n" << endl;
-}
-
-void sendingCommand_CLIENT(int sd, int bytes, string command)
-{
-  if (write (sd, &bytes, sizeof(int)) <= 0)
+  // ./client <server_address> <port>
+  if (argc != 3)
   {
-    errorHandling("[ERROR] Error at writting num bytes for server.\n");
+    printf ("Sintax: %s <server_address> <port>\n", argv[0]);
+    return -1;
   }
+
+  port = atoi (argv[2]); /* Stabilire port */
+
+  if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1)
+  {
+    errorHandling("[client] Error socket().\n");
+    return 0;
+  }
+
+  // Filling the structure used for establishing connection with server
+  server.sin_family = AF_INET; // Socket Family
+  server.sin_addr.s_addr = inet_addr(argv[1]); // IP Address
+  server.sin_port = htons (port); // Connection port
   
-  if (write (sd, command.c_str(), bytes) <= 0)
+  if (connect (sd, (struct sockaddr *) &server,sizeof (struct sockaddr)) == -1)
   {
-    errorHandling("[ERROR] Error at writting command for server.\n");
+    errorHandling("[client] Error connect().\n");
+    return 0;
+  }
+
+  while(1)
+  {
+    printInstructions();
+    int ok = 1;
+
+    command.clear();
+
+    cout << "[client] Write your command: ";
+    fflush (stdout);
+    getline(cin, command);
+
+    if(command == "Disconnect")
+    {
+      int bytes = strlen("Disconnect") + 1;
+      sendingCommand_CLIENT(sd, bytes, command);
+
+      cout << "You have disconnected from the server...\n"s;
+      close(sd);
+      return 0;
+    }
+    else
+    if(command == "Insert")
+    {
+      string insertInfo; // holds information about sql query for inserting in db
+      insertInfo.clear();
+
+      int bytes = strlen("Insert") + 1;
+      sendingCommand_CLIENT(sd, bytes, command);
+
+      string name;
+      cout << "Complete the following information about your application.\n";
+      cout << "Project Name: "; 
+      getline(cin, name);
+
+      bytes = name.length() + 1;
+      sendingCommand_CLIENT(sd, bytes, name); // sending name for verifying it (YES/NO)
+      
+      // reading the answer YES or NO
+      int bytes_sent;
+      if (read (sd, &bytes_sent, sizeof(int)) <= 0)
+      {
+        errorHandling("[ERROR] Error at reading num bytes from server.\n");
+        close(sd);
+        exit(1);
+      }
+
+      char answer[bytes_sent];
+      bzero(answer, bytes_sent);
+
+      if (read (sd, answer, bytes_sent) <= 0)
+      {
+        errorHandling("[ERROR] Error at reading message from server.\n");
+        close(sd);
+        exit(1);
+      }
+
+      if(strcmp(answer,"YES") == 0)
+      {
+        while(strcmp(answer,"YES") == 0) // name already exists?
+        {
+          name.clear();
+          cout << "Project name already exists. Choose another name." << endl;
+          cout << "Project Name: ";
+          getline(cin, name);
+
+          bytes = name.length() + 1;
+          sendingCommand_CLIENT(sd, bytes, name); // sending name for verifying it
+          
+          // reading the answer YES or NO
+          bytes_sent = -1;
+          if (read (sd, &bytes_sent, sizeof(int)) <= 0)
+          {
+            errorHandling("[ERROR] Error at reading num bytes from server.\n");
+            close(sd);
+            exit(1);
+          }
+
+          char answer[bytes_sent];
+          bzero(answer, bytes_sent);
+
+          if (read (sd, answer, bytes_sent) <= 0)
+          {
+            errorHandling("[ERROR] Error at reading message from server.\n");
+            close(sd);
+            exit(1);
+          }
+
+          if(strcmp(answer,"NO") == 0)
+          {
+            break;
+          }
+        }
+      }
+
+      insertInfo.clear();
+      insertInfo = insertValues_Application(name);
+
+      bytes = insertInfo.length() + 1;
+      sendingCommand_CLIENT(sd,bytes, insertInfo); // sending info from Application table
+      
+      name.clear();
+      insertInfo.clear();
+
+      cout << "\nOperating System details:\n";
+      cout << "OS distribution: "; 
+      getline(cin, name);
+
+      // trimitere nume distro
+      if(name.empty() == 1)
+      {
+        insertInfo = insertInfo + "\"-\"";
+      }
+      else
+      {
+        insertInfo = insertInfo + "\""+ name + "\"";
+      }
+
+      // sending the distro name
+      bytes = insertInfo.length() + 1;
+      sendingCommand_CLIENT(sd, bytes, insertInfo);
+      insertInfo.clear();
+      name.clear();
+      
+      cout << "To add one more distribution, write \"ADD\", otherwise write \"STOP\"\nYour command: ";
+      getline(cin, name);
+      if(name == "ADD")
+      {
+        bytes = name.length() + 1;
+        sendingCommand_CLIENT(sd, bytes, name); // sending ADD
+        name.clear();
+
+        cout << "OS distribution: "; 
+        getline(cin, name);
+
+        // trimitere nume distro
+        if(name.empty() == 1)
+        {
+          insertInfo = insertInfo + "\"-\"";
+        }
+        else
+        {
+          insertInfo = insertInfo + "\""+ name + "\"";
+        }
+
+        // sending the distro name
+        bytes = insertInfo.length() + 1;
+        sendingCommand_CLIENT(sd, bytes, insertInfo);
+        insertInfo.clear();
+        name.clear();
+      }
+      else
+      {
+        bytes = name.length() + 1;
+        sendingCommand_CLIENT(sd, bytes, name); // sending STOP
+        name.clear();
+      }
+
+      cout << "Minimum requirements for the application:\n";
+      insertInfo.clear();
+      insertInfo = insertValues_Minimum_Req();
+
+      bytes = insertInfo.length() + 1;
+      sendingCommand_CLIENT(sd,bytes, insertInfo); // sending info from Minimum_Req table
+      insertInfo.clear();
+
+      string check_read;
+      check_read.clear();
+      check_read = readingInfo_CLIENT(sd); //Application inserted.
+      if(check_read == "ERROR!")
+      {
+        errorHandling("[ERROR] Error at reading message from server.\n");
+        close(sd);
+        exit(1);
+      }
+      cout << check_read << endl;
+    }
+    else
+    if(command == "Search")
+    {
+      int bytes = strlen("Search") + 1;
+      sendingCommand_CLIENT(sd, bytes, command); // sending written command
+
+      string availableCriteria = "\nCriteria available:\n- App's Name\n- Developer\n- License\n- Category\n- Internet Connection\n- Operating System\n- CPU\n- RAM\n- Hard Disk Storage\n\n";
+      cout << availableCriteria;
+
+      string searchInfo; // holds information about sql query for searching db with criteria
+      searchInfo.clear();
+      searchInfo = searchApps();
+
+      bytes = searchInfo.length() + 1;
+      sendingCommand_CLIENT(sd, bytes, searchInfo); // sending information about the search criteria
+
+      string check_read;
+      check_read.clear();
+      check_read = readingInfo_CLIENT(sd); // reading the number of apps found
+      if(check_read == "ERROR!")
+      {
+        errorHandling("[ERROR] Error at reading message from server.\n");
+        close(sd);
+        exit(1);
+      }
+      cout << check_read << endl;
+
+      check_read.clear();
+      check_read = readingInfo_CLIENT(sd); // reading all the apps
+      if(check_read == "ERROR!")
+      {
+        errorHandling("[ERROR] Error at reading message from server.\n");
+        close(sd);
+        exit(1);
+      }
+      cout << check_read << endl;
+
+    }
+    else
+    {
+        cout << endl << command << " is an unavailable command. \n";
+        ok = 0;
+    }
+
   }
 }
-
-string readingInfo_CLIENT(int sd)
-{
-  int bytes_sent;
-  if (read (sd, &bytes_sent, sizeof(int)) <= 0)
-  {
-    errorHandling("[ERROR] Error at reading num bytes from server.\n");
-    return "ERROR!";
-  }
-
-  char information[bytes_sent];
-  bzero(information, bytes_sent);
-
-  if (read (sd, information, bytes_sent) <= 0)
-  {
-    errorHandling("[ERROR] Error at reading message from server.\n");
-    return "ERROR!";
-  }
-  string str = information;
-  return str;
-}
-
-int numBytesSent(int client)
-{
-  int bytes_sent;
-  if (read (client, &bytes_sent, sizeof(int)) <= 0) 
-  {
-    cout << "[server] Error at reading num bytes from client.\n";
-    close(client);
-    exit(1);
-  }
-  return bytes_sent;
-}
-
-string readingCommand_SERVER(int client)
-{
-  int bytes_sent = numBytesSent(client);
-  char information[bytes_sent];
-  bzero (information, bytes_sent);
-
-  if (read (client, information, bytes_sent) <= 0)
-  {
-    cout << "[server] Error at reading command from client.\n";
-    return "ERROR!";
-  }
-
-  string info = information;
-  return info;
-}
-
-void sendingInfo_SERVER(int client, string information)
-{
-  int bytes = information.length() + 1;
-
-  if (write (client, &bytes, sizeof(int)) <= 0)
-  {
-      cout << "[server] Error at writting num bytes for client.\n";
-      close(client);  
-      exit(1);
-  }
-
-  // trimitere comanda la server
-  if (write (client, information.c_str(), bytes) <= 0)
-  {
-      cout << "[server] Error at writting command for client.\n";
-      close(client);  
-      exit(1);
-  }
-  else
-      cout << "[server] Client has received the message.\n";
-}
-
-
