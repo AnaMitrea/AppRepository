@@ -141,7 +141,7 @@ string insertQuery(sqlite3* db, string sqlQuery)
     }
     else
     {
-        return "\n[Inserting Query succeeded]\n";
+        return "[Inserting Query succeeded]";
     }
 }
 
