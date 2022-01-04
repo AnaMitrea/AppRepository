@@ -26,13 +26,14 @@ int main ()
 
   if (signal (SIGCHLD, (sighandler_t)sighandler) == SIG_ERR)
   {
-    perror ("signal()");
-    return 1;
+    errorHandling("[server]Error signal().\n");
+    return 0;
   }
 
   if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1)
   {
     errorHandling("[server]Error socket().\n");
+    return 0;
   }
 
   bzero (&server, sizeof (server));
@@ -47,32 +48,35 @@ int main ()
   if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
   {
     errorHandling("setsockopt(SO_REUSEADDR) failed.\n");
+    return 0;
   }
 
   if (bind (sd, (struct sockaddr *) &server, sizeof (struct sockaddr)) == -1)
   {
     errorHandling("[server]Error bind().\n");
+    return 0;
   }
 
   if (listen (sd, 5) == -1) // queue of 5 
   {
     errorHandling("[server]Error listen().\n");
+    return 0;
   }
+
+  cout << "[server] Waiting at "<< PORT << " port...\n";
+  fflush (stdout);
 
   while (1)
   {
     int client;
     socklen_t length = sizeof (from);
 
-    cout << "[server] Waiting at "<< PORT << " port...\n";
-    fflush (stdout);
-
     // Accepting client (blocking state till connection establishes)
     client = accept (sd, (struct sockaddr *) &from, &length);
 
     if (client < 0)
     {
-      perror ("[server] Erorr accept().\n");
+      cout << "[server] Erorr accept().\n";
       continue;
     }
 
@@ -86,7 +90,7 @@ int main ()
         cout << "[server] Waiting client to write command...\n";
         fflush (stdout);
         string command = readingCommand_SERVER(client);
-        if(command.empty())
+        if(command == "ERROR!")
         {
           printf ("[server] A client has lost connection from the server. \n");
           close (client); 
@@ -94,13 +98,15 @@ int main ()
         }
         
         cout << "[server] Command sent by client: \"" << command << "\"\n";
-        
+
+// DISCONNECT COMMAND
         if(command == "Disconnect")
         {
           printf ("[server] A client has disconnected from server. \n");
           close (client); 
           exit(1);
         }
+// INSERT COMMAND
         else
         if(command == "Insert")
         {
@@ -108,6 +114,12 @@ int main ()
           insertInfo.clear();
 
           string name = readingCommand_SERVER(client); // reading the appname
+          if(name == "ERROR!")
+          {
+            printf ("[server] A client has lost connection from the server. \n");
+            close (client); 
+            exit(1);
+          }
 
           bool verif = verifyingExistingName(db, name);
           if(verif == true)
@@ -119,6 +131,13 @@ int main ()
               sendingInfo_SERVER(client, "YES");
               name.clear();
               name = readingCommand_SERVER(client); // reading the appname
+              if(name == "ERROR!")
+              {
+                printf ("[server] A client has lost connection from the server. \n");
+                close (client); 
+                exit(1);
+              }
+
               verif = verifyingExistingName(db, name);
               if(verif == false)
               {
@@ -136,10 +155,17 @@ int main ()
 
     // inserting in Application Table
           insertInfo = readingCommand_SERVER(client); // info from application table
+          if(insertInfo == "ERROR!")
+          {
+            printf ("[server] A client has lost connection from the server. \n");
+            close (client); 
+            exit(1);
+          }
+
           sqlQuery.clear();
 
           sqlQuery = "INSERT INTO Application(AppName, Developer, Executable_name, License, Category, InternetConnection, AppInfo) VALUES(" + insertInfo + ");";
-          cout << "Application table- interogare: " << sqlQuery << endl;
+          cout << "Application table - sqlQuery " << sqlQuery << endl;
           sqlResponse = insertQuery(db, sqlQuery);
           cout << sqlResponse; // Inserting Query succeeded or not
           sqlResponse.clear();
@@ -150,36 +176,60 @@ int main ()
           string appID = getAppID(db,appName);
           insertInfo.clear();
           insertInfo = readingCommand_SERVER(client); // distro name to be inserted in OS
+          if(insertInfo == "ERROR!")
+          {
+            printf ("[server] A client has lost connection from the server. \n");
+            close (client); 
+            exit(1);
+          }
 
           sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + "," + insertInfo + ");";
-          cout << "OS table- interogare: " << sqlQuery << endl;
+          cout << "OS table - sqlQuery: " << sqlQuery << endl;
           sqlResponse = insertQuery(db, sqlQuery);
           cout << sqlResponse << endl; // Inserting Query succeeded or not
           sqlResponse.clear();
 
           string add_stop = readingCommand_SERVER(client);
+          if(add_stop == "ERROR!")
+          {
+            printf ("[server] A client has lost connection from the server. \n");
+            close (client); 
+            exit(1);
+          }
 
           if(add_stop == "ADD")
           {
             insertInfo.clear();
             insertInfo = readingCommand_SERVER(client); // distro name to be inserted in OS
+            if(insertInfo == "ERROR!")
+            {
+              printf ("[server] A client has lost connection from the server. \n");
+              close (client); 
+              exit(1);
+            }
 
             sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + "," + insertInfo + ");";
-            cout << "Min_req table- interogare: " << sqlQuery << endl;
+            cout << "OS table - sqlQuery: " << sqlQuery << endl;
             sqlResponse = insertQuery(db, sqlQuery);
             cout << sqlResponse << endl; // Inserting Query succeeded or not
             sqlResponse.clear();
           }
           add_stop.clear();
+          
     // Inserting in Minimum_req table
-
           insertInfo.clear();
           sqlQuery.clear();
           sqlResponse.clear();
 
           insertInfo.clear();
           insertInfo = readingCommand_SERVER(client); // info to be inserted in Minimum_Req Table
-          cout << "Application table- info: " << insertInfo << endl;
+          if(insertInfo == "ERROR!")
+          {
+            printf ("[server] A client has lost connection from the server. \n");
+            close (client); 
+            exit(1);
+          }
+          cout << "Min_req table - sqlQuery " << insertInfo << endl;
           sqlQuery = "INSERT INTO Minimum_Req(AppID,GHzCPU, GPU, GB_RAM, GB_HDStorage) VALUES(" + appID + "," + insertInfo + ");";
           sqlResponse = insertQuery(db, sqlQuery);
           cout << sqlResponse << endl; // Inserting Query succeeded or not
@@ -190,6 +240,7 @@ int main ()
           cout << "[server] Sending back information... \n";
           sendingInfo_SERVER(client, sqlResponse);
         }
+// SEARCH COMMAND
         else
         if(command == "Search")
         {
@@ -199,6 +250,13 @@ int main ()
           searchInfo.clear();
 
           searchInfo = readingCommand_SERVER(client); // search criteria
+          if(searchInfo == "ERROR!")
+          {
+            printf ("[server] A client has lost connection from the server. \n");
+            close (client); 
+            exit(1);
+          }
+
           cout << "Search criteria: \"" <<  searchInfo << "\"." << endl;
           
           if(searchInfo.empty() == 0) // nu e empty
