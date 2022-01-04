@@ -343,6 +343,7 @@ string getAppID(sqlite3* db, string appName)
 
         int position = sqlQueryResult.find("=") + 1;
         string appID =sqlQueryResult.substr(position + 1, sqlQueryResult.length() - position);
+        appID = appID.substr(0,appID.length() - 1);
 
         return appID;
     }
@@ -523,8 +524,6 @@ string numberOfAppsFound(sqlite3* db, string sqlQuery)
 
     string nrstring = sqlResponse.substr(26,string::npos);
     nrstring = nrstring.substr(0,nrstring.length() - 1);
-
-    cout << "nrstring=\"" << nrstring << "\"" << endl;
 
     return nrstring;
 }
