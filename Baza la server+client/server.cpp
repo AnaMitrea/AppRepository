@@ -129,6 +129,7 @@ int main ()
               cout << "The \"" << name << "\" is already in the database.\n";
               cout << "[server] Sending back information... \n";
               sendingInfo_SERVER(client, "YES");
+
               name.clear();
               name = readingCommand_SERVER(client); // reading the appname
               if(name == "ERROR!")
@@ -165,9 +166,9 @@ int main ()
           sqlQuery.clear();
 
           sqlQuery = "INSERT INTO Application(AppName, Developer, Executable_name, License, Category, InternetConnection, AppInfo) VALUES(" + insertInfo + ");";
-          cout << "Application table - sqlQuery " << sqlQuery << endl;
+          cout << "Application table - sqlQuery: " << sqlQuery << endl;
           sqlResponse = insertQuery(db, sqlQuery);
-          cout << sqlResponse; // Inserting Query succeeded or not
+          cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
           sqlResponse.clear();
           sqlQuery.clear();
 
@@ -186,7 +187,7 @@ int main ()
           sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + "," + insertInfo + ");";
           cout << "OS table - sqlQuery: " << sqlQuery << endl;
           sqlResponse = insertQuery(db, sqlQuery);
-          cout << sqlResponse << endl; // Inserting Query succeeded or not
+          cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
           sqlResponse.clear();
 
           string add_stop = readingCommand_SERVER(client);
@@ -211,7 +212,7 @@ int main ()
             sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + "," + insertInfo + ");";
             cout << "OS table - sqlQuery: " << sqlQuery << endl;
             sqlResponse = insertQuery(db, sqlQuery);
-            cout << sqlResponse << endl; // Inserting Query succeeded or not
+            cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
             sqlResponse.clear();
           }
           add_stop.clear();
@@ -229,10 +230,10 @@ int main ()
             close (client); 
             exit(1);
           }
-          cout << "Min_req table - sqlQuery " << insertInfo << endl;
+          cout << "Min_req table - sqlQuery: " << insertInfo << endl;
           sqlQuery = "INSERT INTO Minimum_Req(AppID,GHzCPU, GPU, GB_RAM, GB_HDStorage) VALUES(" + appID + "," + insertInfo + ");";
           sqlResponse = insertQuery(db, sqlQuery);
-          cout << sqlResponse << endl; // Inserting Query succeeded or not
+          cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
           sqlResponse.clear();
 
 
@@ -286,8 +287,6 @@ int main ()
           }
           
          
-
-
           sqlQuery.clear();
           sqlResponse.clear();
           searchInfo.clear();
