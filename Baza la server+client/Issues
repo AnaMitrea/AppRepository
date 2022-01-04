@@ -2,3 +2,4 @@
 - file transfer
     - de vazut cazuri in care introduce sau nu un OS distro
 - eroare la read cand se deconecteaza random -> REZOLVAT
+- daca nu se introduce nicio comanda, string-ul este empty si afiseaza ca "" nu este o comanda valida  -> REZOLVAT
