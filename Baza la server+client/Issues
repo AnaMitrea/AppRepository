@@ -1,5 +1,5 @@
 - la search daca nu se introduce niciun criteriu sa nu dea eroare -> REZOLVAT
 - file transfer
     - de vazut cazuri in care introduce sau nu un OS distro
-- eroare la read cand se deconecteaza random -> REZOLVAT
+- eroare la read cand se deconecteaza random -> REZOLVAT PARTIAL - de pus alt mesaj eroare
 - daca nu se introduce nicio comanda, string-ul este empty si afiseaza ca "" nu este o comanda valida  -> REZOLVAT
