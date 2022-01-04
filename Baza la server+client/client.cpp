@@ -257,9 +257,15 @@ int main (int argc, char *argv[])
     }
     else
     {
-        cout << endl << command << " is an unavailable command. \n";
-        ok = 0;
+      if(command.empty() == 0)
+      {
+        cout << endl << "\""<< command << "\" is an unavailable command. \n";
+      }
+      else
+      {
+        cout << "\nType a command!";
+      }
+       ok = 0;
     }
-
   }
 }
