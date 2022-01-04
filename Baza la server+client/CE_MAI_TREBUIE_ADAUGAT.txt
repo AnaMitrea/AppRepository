@@ -1,3 +1,4 @@
-- la search daca nu se introduce niciun criteriu sa nu dea eroare - rezolvat
+- la search daca nu se introduce niciun criteriu sa nu dea eroare -> REZOLVAT
 - file transfer
-- eroare la read cand se deconecteaza random
+    - de vazut cazuri in care introduce sau nu un OS distro
+- eroare la read cand se deconecteaza random -> REZOLVAT
