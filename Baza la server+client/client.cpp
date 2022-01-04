@@ -20,6 +20,7 @@ int main (int argc, char *argv[])
   if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1)
   {
     errorHandling("[client] Error socket().\n");
+    return 0;
   }
 
   // Filling the structure used for establishing connection with server
@@ -30,6 +31,7 @@ int main (int argc, char *argv[])
   if (connect (sd, (struct sockaddr *) &server,sizeof (struct sockaddr)) == -1)
   {
     errorHandling("[client] Error connect().\n");
+    return 0;
   }
 
   while(1)
@@ -63,25 +65,36 @@ int main (int argc, char *argv[])
 
       string name;
       cout << "Complete the following information about your application.\n";
-      cout << "Project Name: "; 
+      cout << "Application Name: "; 
       getline(cin, name);
+
+      while(name.empty() == 1)
+      {
+          cout << "Application's Name field must be completed!" << endl;
+          cout << "Application Name: ";
+          getline(cin, name);
+      }
 
       bytes = name.length() + 1;
       sendingCommand_CLIENT(sd, bytes, name); // sending name for verifying it (YES/NO)
       
       // reading the answer YES or NO
       int bytes_sent;
-      if (read (sd, &bytes_sent, sizeof(int)) < 0)
+      if (read (sd, &bytes_sent, sizeof(int)) <= 0)
       {
         errorHandling("[ERROR] Error at reading num bytes from server.\n");
+        close(sd);
+        exit(1);
       }
 
       char answer[bytes_sent];
       bzero(answer, bytes_sent);
 
-      if (read (sd, answer, bytes_sent) < 0)
+      if (read (sd, answer, bytes_sent) <= 0)
       {
         errorHandling("[ERROR] Error at reading message from server.\n");
+        close(sd);
+        exit(1);
       }
 
       if(strcmp(answer,"YES") == 0)
@@ -98,17 +111,21 @@ int main (int argc, char *argv[])
           
           // reading the answer YES or NO
           bytes_sent = -1;
-          if (read (sd, &bytes_sent, sizeof(int)) < 0)
+          if (read (sd, &bytes_sent, sizeof(int)) <= 0)
           {
             errorHandling("[ERROR] Error at reading num bytes from server.\n");
+            close(sd);
+            exit(1);
           }
 
           char answer[bytes_sent];
           bzero(answer, bytes_sent);
 
-          if (read (sd, answer, bytes_sent) < 0)
+          if (read (sd, answer, bytes_sent) <= 0)
           {
             errorHandling("[ERROR] Error at reading message from server.\n");
+            close(sd);
+            exit(1);
           }
 
           if(strcmp(answer,"NO") == 0)
@@ -189,8 +206,16 @@ int main (int argc, char *argv[])
       sendingCommand_CLIENT(sd,bytes, insertInfo); // sending info from Minimum_Req table
       insertInfo.clear();
 
-
-      readingInfo_CLIENT(sd); //Application inserted.
+      string check_read;
+      check_read.clear();
+      check_read = readingInfo_CLIENT(sd); //Application inserted.
+      if(check_read == "ERROR!")
+      {
+        errorHandling("[ERROR] Error at reading message from server.\n");
+        close(sd);
+        exit(1);
+      }
+      cout << check_read << endl;
     }
     else
     if(command == "Search")
@@ -208,8 +233,26 @@ int main (int argc, char *argv[])
       bytes = searchInfo.length() + 1;
       sendingCommand_CLIENT(sd, bytes, searchInfo); // sending information about the search criteria
 
-      readingInfo_CLIENT(sd); // reading the number of apps found
-      readingInfo_CLIENT(sd); // reading all the apps
+      string check_read;
+      check_read.clear();
+      check_read = readingInfo_CLIENT(sd); // reading the number of apps found
+      if(check_read == "ERROR!")
+      {
+        errorHandling("[ERROR] Error at reading message from server.\n");
+        close(sd);
+        exit(1);
+      }
+      cout << check_read << endl;
+
+      check_read.clear();
+      check_read = readingInfo_CLIENT(sd); // reading all the apps
+      if(check_read == "ERROR!")
+      {
+        errorHandling("[ERROR] Error at reading message from server.\n");
+        close(sd);
+        exit(1);
+      }
+      cout << check_read << endl;
 
     }
     else
