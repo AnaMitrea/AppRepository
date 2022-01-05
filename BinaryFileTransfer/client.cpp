@@ -55,27 +55,28 @@ int main()
     getline(cin,msg);
 
     char *filename = (char*)msg.c_str();
-    cout << "\nfilename= \"" << filename << "\"\n";
+    cout << "filename= \"" << filename << "\"\n";
 
-    fp = fopen(filename, "rb");
+    fp = fopen(filename, "rb"); //opening a binary file
     if(fp == NULL)
     {
         perror("[-]Error in reading file.");
         exit(1);
     }
 
+
     /* Read data from file and send it */
     while(1)
     {
-        unsigned char buff[1024]={0};
-        int nread = fread(buff,1,1024,fp);
-
-        if( nread > 0 )
+        unsigned char buff[1024];
+        memset(buff, 0, 1024);
+        int nread; //= fread(buff,1,1024,fp);
+        if((nread = fread(buff, 1, 1024, fp)) > 0)
         {
-            write( sd , buff , nread );
+            write(sd, buff, nread);
         }
 
-        if( nread < 1024 )
+        if(nread < 1024)
         {
             if(feof(fp)) // EOF
             {
@@ -90,7 +91,6 @@ int main()
         }
     }
 
-    
     close(sd);
     fclose(fp);
 
