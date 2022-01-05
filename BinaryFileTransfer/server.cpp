@@ -61,7 +61,7 @@ int main ()
 
     // aici primeste numele fisierului
     FILE *fp;
-    fp = fopen( "/home/ana/Desktop/Retele/Tema2/FileTransfer/AppsSent/discord2.deb" , "ab" );
+    fp = fopen("discord2.deb", "ab");
 
     if(NULL == fp)
     {
