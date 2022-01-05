@@ -274,6 +274,16 @@ int main ()
               sqlQuery = "SELECT * FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
               sqlResponse = selectQuery_SEARCH(db, sqlQuery);
               sendingInfo_SERVER(client, sqlResponse); //sending all the apps which have the criteria
+
+              /*
+              citire raspuns 
+
+              msg != nu 
+
+                idkit
+
+                send_file(fd, idkit)
+              */
             }
             else
             {
