@@ -254,6 +254,52 @@ int main (int argc, char *argv[])
       }
       cout << check_read << endl;
 
+      cout << "[client] To download an application, write down the ID_exec from the list, otherwise, write STOP.\n";
+      cout << "ID_exec: ";
+      fflush (stdout);
+      command.clear();
+      getline(cin, command);
+
+      if(command.empty() == 1 || command == "STOP")
+      {
+        bytes = command.length() + 1;
+        sendingCommand_CLIENT(sd, bytes, command);
+      }
+      else // s a introdus un id pt executabilul respectiv
+      {
+        bytes = command.length() + 1;
+        sendingCommand_CLIENT(sd, bytes, command);
+        // serverul verifica .....
+
+
+        check_read.clear();
+        check_read = readingInfo_CLIENT(sd); // ok sau not ok in functie de corectitudinea id_exec
+        if(check_read == "ERROR!")
+        {
+          errorHandling("[ERROR] Error at reading message from server.\n");
+          close(sd);
+          exit(1);
+        }
+        else
+        if(check_read == "UNKNOWN") // Id ul introdus este gresit
+        {
+          cout << "Error at downloading app. Unknown ID_exec. Please try again." << endl;
+        }
+        else
+        if(check_read == "OK")  // id ul introdus este corect si executabilul poate fi descarcat
+        {
+          // ...
+        }
+
+      }
+
+
+      /*
+      cout << "Vr sa descarci o aplicatie?" << endl;
+      -> ID/NU/empty()
+
+      receive_file(fd);
+      */
     }
     else
     {
@@ -265,7 +311,7 @@ int main (int argc, char *argv[])
       {
         cout << "\nType a command!";
       }
-       ok = 0;
+      ok = 0;
     }
   }
 }
