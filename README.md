@@ -15,4 +15,3 @@ Redactarea raportului tehnic se va face in format LNCS (https://www.springer.com
 - Concluzii (e.g. cum ar putea fi imbunatatita solutia propusa?)
 - Bibliografie
 
-Termen de predare: laboratorul din saptamana 11.
