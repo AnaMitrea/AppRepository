@@ -3,3 +3,27 @@
     - de vazut cazuri in care introduce sau nu un OS distro
 - eroare la read cand se deconecteaza random -> REZOLVAT PARTIAL - de pus alt mesaj eroare
 - daca nu se introduce nicio comanda, string-ul este empty si afiseaza ca "" nu este o comanda valida  -> REZOLVAT
+- modificare functie callback_search ca sa nu mai afiseze informatiile lipsa
+
+
+sendFile(int fd, string idkit)
+{
+    verificare existenta fisier cu executable in db
+        "select executable from OS_table WHERE id_exec = " + idkit + ";";
+    
+    executable = aps/1.deb sau executable.empty()
+    verif sir_executable daca e empty sau nu
+        empty -> send la client mesaj ca nu exista fisier
+        return -1. verific -1 dupa apel functie -> ies din comanda care se executa si astept alta.
+
+    modificare "executable = aps/1.deb" in "aps/1.deb"
+    string numeAppPtClient = "1.deb" si trimit la client numele
+}
+
+receive(int fd)
+{
+    read() -> mesaj daca sau nu executabilul
+        -> nu exista, return -1 si clientul iese din if ul cu search
+    read() -> primeste numele executabilului.
+            -> deschidere fisier.... etc 
+}
