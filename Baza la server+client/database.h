@@ -55,6 +55,8 @@ static int callback_SEARCH(void* data, int argc, char** argv, char** azColName) 
     // atribute1 = value1
     // atribute2 = value2
     // ...
+    
+    // de modificat sa nu mai afiseze informatiile lipsa
 
     char* information = (char*) data;
     for (int i = 0; i < argc; i++) 
