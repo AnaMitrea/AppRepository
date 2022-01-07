@@ -144,21 +144,65 @@ int main (int argc, char *argv[])
       name.clear();
       insertInfo.clear();
 
+      string distro_name;
+      string exec_name;
+      distro_name.clear();
+      exec_name.clear();
+
       cout << "\nOperating System details:\n";
       cout << "OS distribution: "; 
-      getline(cin, name);
+      getline(cin, distro_name);
 
       // trimitere nume distro
-      if(name.empty() == 1)
+      if(distro_name.empty() == 1)
       {
-        insertInfo = insertInfo + "\"-\"";
+        insertInfo = "NO_distro";
+        bytes = insertInfo.length() + 1;
+        sendingCommand_CLIENT(sd,bytes, insertInfo);
       }
       else
       {
-        insertInfo = insertInfo + "\""+ name + "\"";
+        bytes = distro_name.length() + 1;
+        sendingCommand_CLIENT(sd,bytes, distro_name); // distro_name
+
+        // EXECUTABLE NAME
+        cout << "Do you want to upload the executable of your application? Write YES or NO.\n";
+        cout << "Your command: ";
+
+        command.clear();
+        getline(cin, command);
+        if(command == "YES")
+        { 
+          bytes = command.length() + 1;
+          sendingCommand_CLIENT(sd, bytes, command); // YES
+
+          cout << "Executable (as\"example.exe\", \"example.app\" etc): ";
+          exec_name.clear();
+          getline(cin, exec_name);
+
+          while(exec_name.empty() == 1)
+          {
+            cout << "Executable's Name field must be completed!" << endl;
+            cout << "Executable: ";
+            getline(cin, exec_name);
+          }
+
+          cout << "exec_name= " << exec_name << "|\n";
+          bytes = exec_name.length() + 1;
+          sendingCommand_CLIENT(sd, bytes, exec_name); // exec_name
+
+          
+          // sendFile_to_server()
+        }
+        else
+        {
+          bytes = command.length() + 1;
+          sendingCommand_CLIENT(sd, bytes, command);
+        }
       }
 
-      // sending the distro name
+      cout << endl << insertInfo << endl;
+      // sending the distro name + executable name
       bytes = insertInfo.length() + 1;
       sendingCommand_CLIENT(sd, bytes, insertInfo);
       insertInfo.clear();
