@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
 
       while(name.empty() == 1)
       {
-          cout << "Application's Name field must be completed!" << endl;
+          cout << "[client] Application's Name field must be completed!" << endl;
           cout << "Application Name: ";
           getline(cin, name);
       }
@@ -102,7 +102,7 @@ int main (int argc, char *argv[])
         while(strcmp(answer,"YES") == 0) // name already exists?
         {
           name.clear();
-          cout << "Project name already exists. Choose another name." << endl;
+          cout << "[client] Project name already exists. Choose another name." << endl;
           cout << "Project Name: ";
           getline(cin, name);
 
@@ -140,6 +140,15 @@ int main (int argc, char *argv[])
 
       bytes = insertInfo.length() + 1;
       sendingCommand_CLIENT(sd,bytes, insertInfo); // sending info from Application table
+
+// Inserting into Min_req Table
+      cout << "\n[client] Minimum requirements for the application:\n";
+      insertInfo.clear();
+      insertInfo = insertValues_Minimum_Req();
+
+      bytes = insertInfo.length() + 1;
+      sendingCommand_CLIENT(sd,bytes, insertInfo); // sending info from Minimum_Req table
+      insertInfo.clear();
       
       name.clear();
       insertInfo.clear();
@@ -149,7 +158,7 @@ int main (int argc, char *argv[])
       distro_name.clear();
       exec_name.clear();
 
-      cout << "\nOperating System details:\n";
+      cout << "\n[client] Operating System details:\n";
       cout << "OS distribution: "; 
       getline(cin, distro_name);
 
@@ -166,7 +175,7 @@ int main (int argc, char *argv[])
         sendingCommand_CLIENT(sd,bytes, distro_name); // distro_name
 
         // EXECUTABLE NAME
-        cout << "Do you want to upload the executable of your application? Write YES or NO.\n";
+        cout << "[client] Do you want to upload the executable of your application? Write YES or NO.\n";
         cout << "Your command: ";
 
         command.clear();
@@ -176,7 +185,7 @@ int main (int argc, char *argv[])
           bytes = command.length() + 1;
           sendingCommand_CLIENT(sd, bytes, command); // YES
 
-          cout << "Executable (as\"example.exe\", \"example.app\" etc): ";
+          cout << "Executable's Name needs to be as \"example.exe\", \"example.app\" etc.\nExecutable: ";
           exec_name.clear();
           getline(cin, exec_name);
 
@@ -187,11 +196,36 @@ int main (int argc, char *argv[])
             getline(cin, exec_name);
           }
 
-          bytes = exec_name.length() + 1;
-          sendingCommand_CLIENT(sd, bytes, exec_name); // exec_name
+          // de verificat daca exista fisierul
+          // daca exista -> trimit exec_name la server
+          // daca nu exista -> trimit un mesaj de eroare
 
-          
-          // sendFile_to_server()
+          int check_file = existing_file_check(exec_name);
+          if(check_file == 1) // file exists -> sending to server the executable name
+          {
+            bytes = exec_name.length() + 1;
+            sendingCommand_CLIENT(sd, bytes, exec_name); // exec_name
+
+            // sendFile_to_server()
+
+            string check_read;
+            check_read.clear();
+            check_read = readingInfo_CLIENT(sd); //Application inserted or not.
+            if(check_read == "ERROR!")
+            {
+              errorHandling("[ERROR] Error at reading message from server.\n");
+              close(sd);
+              exit(1);
+            }
+            cout << check_read << endl;
+          }
+          else
+          {
+            cout << "[client] Error: File name doesn't exist.\n";
+            exec_name = "FILE_DOES_NOT_EXIST";
+            bytes = exec_name.length() + 1;
+            sendingCommand_CLIENT(sd, bytes, exec_name); // EXEC_NAME ERROR
+          }
         }
         else
         {
@@ -199,25 +233,6 @@ int main (int argc, char *argv[])
           sendingCommand_CLIENT(sd, bytes, command);
         }
       }
-
-      cout << "Minimum requirements for the application:\n";
-      insertInfo.clear();
-      insertInfo = insertValues_Minimum_Req();
-
-      bytes = insertInfo.length() + 1;
-      sendingCommand_CLIENT(sd,bytes, insertInfo); // sending info from Minimum_Req table
-      insertInfo.clear();
-
-      string check_read;
-      check_read.clear();
-      check_read = readingInfo_CLIENT(sd); //Application inserted.
-      if(check_read == "ERROR!")
-      {
-        errorHandling("[ERROR] Error at reading message from server.\n");
-        close(sd);
-        exit(1);
-      }
-      cout << check_read << endl;
     }
     else
     if(command == "Search")
@@ -257,13 +272,14 @@ int main (int argc, char *argv[])
       cout << check_read << endl;
 
       cout << "[client] To download an application, write down the ID_exec from the list, otherwise, write STOP.\n";
-      cout << "ID_exec: ";
-      fflush (stdout);
+      cout << "ID exec: ";
+
       command.clear();
       getline(cin, command);
 
-      if(command.empty() == 1 || command == "STOP")
+      if(command.empty() == 1 || command == "STOP") // se trimite stop
       {
+        command = "STOP";
         bytes = command.length() + 1;
         sendingCommand_CLIENT(sd, bytes, command);
       }
@@ -271,6 +287,8 @@ int main (int argc, char *argv[])
       {
         bytes = command.length() + 1;
         sendingCommand_CLIENT(sd, bytes, command);
+
+
         // serverul verifica .....
 
 
