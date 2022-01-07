@@ -548,3 +548,4 @@ string numberOfAppsFound(sqlite3* db, string sqlQuery)
 
     return nrstring;
 }
+ 
