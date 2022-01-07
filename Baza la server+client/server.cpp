@@ -165,30 +165,82 @@ int main ()
 
           sqlQuery.clear();
 
-          sqlQuery = "INSERT INTO Application(AppName, Developer, Executable_name, License, Category, InternetConnection, AppInfo) VALUES(" + insertInfo + ");";
+          sqlQuery = "INSERT INTO Application(AppName, Developer, License, Category, InternetConnection, AppInfo) VALUES(" + insertInfo + ");";
           cout << "Application table - sqlQuery: " << sqlQuery << endl;
           sqlResponse = insertQuery(db, sqlQuery);
           cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
           sqlResponse.clear();
           sqlQuery.clear();
 
-
     // inserting in OS Table
           string appID = getAppID(db,appName);
-          insertInfo.clear();
-          insertInfo = readingCommand_SERVER(client); // distro name to be inserted in OS
-          if(insertInfo == "ERROR!")
+          string distro_name;
+          distro_name.clear();
+
+          distro_name = readingCommand_SERVER(client); // OS_name to be inserted in OS table
+          cout << "distro_name= " << distro_name << ".\n";
+
+          if(distro_name == "ERROR!")
           {
             printf ("[server] A client has lost connection from the server. \n");
             close (client); 
             exit(1);
           }
 
-          sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + "," + insertInfo + ");";
-          cout << "OS table - sqlQuery: " << sqlQuery << endl;
-          sqlResponse = insertQuery(db, sqlQuery);
-          cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
-          sqlResponse.clear();
+          string exec_name;
+
+          if(distro_name != "NO_distro") // client inserted a distro_name
+          {
+            string maxID_exec = getMAXID_exec(db);
+            cout << "maxID_exec= " << maxID_exec << "|\n";
+
+            command.clear();
+            command = readingCommand_SERVER(client); // yes or no or error
+            if(command == "ERROR!")
+            {
+              printf ("[server] A client has lost connection from the server. \n");
+              close (client); 
+              exit(1);
+            }
+
+            if(command == "YES")
+            {
+              exec_name.clear();
+              exec_name = readingCommand_SERVER(client); // exec_name such as discord.deb
+              if(exec_name == "ERROR!")
+              {
+                printf ("[server] A client has lost connection from the server. \n");
+                close (client); 
+                exit(1);
+              }
+
+              string extension;
+              extension.clear();
+
+              int pos = exec_name.find(".");
+              extension = exec_name.substr(pos,string::npos);
+
+              string execInsert;  //executable_name to be inserted in OS table as apps/id.extension
+              execInsert.clear();
+              execInsert = "apps/" + maxID_exec + extension;
+              cout << "execInsert= " << execInsert << "\n";
+
+              sqlQuery = "INSERT INTO OS(AppID, OS_Name, ID_exec, Executable_Name) VALUES("+ appID + ",\"" + distro_name + "\"," +  maxID_exec + ",\"" + execInsert + "\");";
+              cout << "OS table - sqlQuery: " << sqlQuery << endl;
+              sqlResponse = insertQuery(db, sqlQuery);
+              cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
+              sqlResponse.clear();
+
+              // yes inseamna ca clientul vrea sa faca upload la fisierul cu numele din distro_name
+              // dar in tabel trebuie salvat ca si apps/"maxID_exec".extensie
+
+            }
+
+
+          }
+
+
+          
 
           string add_stop = readingCommand_SERVER(client);
           if(add_stop == "ERROR!")
