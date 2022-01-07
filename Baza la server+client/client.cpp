@@ -187,7 +187,6 @@ int main (int argc, char *argv[])
             getline(cin, exec_name);
           }
 
-          cout << "exec_name= " << exec_name << "|\n";
           bytes = exec_name.length() + 1;
           sendingCommand_CLIENT(sd, bytes, exec_name); // exec_name
 
@@ -199,47 +198,6 @@ int main (int argc, char *argv[])
           bytes = command.length() + 1;
           sendingCommand_CLIENT(sd, bytes, command);
         }
-      }
-
-      cout << endl << insertInfo << endl;
-      // sending the distro name + executable name
-      bytes = insertInfo.length() + 1;
-      sendingCommand_CLIENT(sd, bytes, insertInfo);
-      insertInfo.clear();
-      name.clear();
-      
-      cout << "To add one more distribution, write \"ADD\", otherwise write \"STOP\"\nYour command: ";
-      getline(cin, name);
-      if(name == "ADD")
-      {
-        bytes = name.length() + 1;
-        sendingCommand_CLIENT(sd, bytes, name); // sending ADD
-        name.clear();
-
-        cout << "OS distribution: "; 
-        getline(cin, name);
-
-        // trimitere nume distro
-        if(name.empty() == 1)
-        {
-          insertInfo = insertInfo + "\"-\"";
-        }
-        else
-        {
-          insertInfo = insertInfo + "\""+ name + "\"";
-        }
-
-        // sending the distro name
-        bytes = insertInfo.length() + 1;
-        sendingCommand_CLIENT(sd, bytes, insertInfo);
-        insertInfo.clear();
-        name.clear();
-      }
-      else
-      {
-        bytes = name.length() + 1;
-        sendingCommand_CLIENT(sd, bytes, name); // sending STOP
-        name.clear();
       }
 
       cout << "Minimum requirements for the application:\n";
