@@ -100,7 +100,7 @@ string readingCommand_SERVER(int client)
 
   if (read (client, information, bytes_sent) <= 0)
   {
-    cout << "[server] Error at reading command from client.\n";
+    cout << "[server] Error at reading command from client. Client disconnected.\n";
     return "ERROR!";
   }
 
@@ -114,7 +114,7 @@ void sendingInfo_SERVER(int client, string information)
 
   if (write (client, &bytes, sizeof(int)) <= 0)
   {
-      cout << "[server] Error at writting num bytes for client.\n";
+      cout << "[server] Error at writting num bytes for client. Client disconnected.\n";
       close(client);  
       exit(1);
   }
@@ -122,11 +122,10 @@ void sendingInfo_SERVER(int client, string information)
   // trimitere comanda la server
   if (write (client, information.c_str(), bytes) <= 0)
   {
-      cout << "[server] Error at writting command for client.\n";
+      cout << "[server] Error at writting command for client. Client disconnected.\n";
       close(client);  
       exit(1);
   }
   else
       cout << "[server] Client has received the message.\n";
 }
-
