@@ -253,7 +253,7 @@ cout << "dupa inserare in min_req" << endl;
                 cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
                 sqlResponse.clear();
 
-                sqlResponse = "\nApplication inserted.\n";
+                sqlResponse = "\nApplication inserted.";
                 cout << "[server] Sending back information... \n";
                 sendingInfo_SERVER(client, sqlResponse);
               }
