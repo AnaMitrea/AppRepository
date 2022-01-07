@@ -19,6 +19,7 @@ bool verifyingExistingName(sqlite3* db, string appName);
 string insertValues_Application(string name);
 string insertValues_Minimum_Req();
 string getAppID(sqlite3* db, string appName);
+string getMAXID_exec(sqlite3* db);
 string searchApps();
 string numberOfAppsFound(sqlite3* db, string sqlQuery);
 
@@ -181,19 +182,6 @@ string insertValues_Application(string name)
     }
     insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
 
-    // EXECUTABLE NAME
-    cinBuffer.clear(); //reset string
-    cout << "Executable: "; 
-    getline(cin, cinBuffer);
-
-    while(cinBuffer.empty() == 1)
-    {
-        cout << "Executable's Name field must be completed!" << endl;
-        cout << "Executable: ";
-        getline(cin, cinBuffer);
-    }
-    insertInfo = insertInfo + ",\""+ cinBuffer + "\"";
-
     // LICENSE
     cinBuffer.clear(); //reset string
     cout << "License: "; 
@@ -344,6 +332,41 @@ string getAppID(sqlite3* db, string appName)
         appID = appID.substr(0,appID.length() - 1);
 
         return appID;
+    }
+}
+
+string getMAXID_exec(sqlite3* db) 
+{
+    char* SQL_errorMessage; // error message from sql query
+    char data[maxi]; // callback argument
+    string sqlQueryResult;
+    sqlQueryResult.clear();
+    data[0] = 0;
+
+    string sqlQuery;
+    sqlQuery.clear();
+    sqlQuery =  "SELECT MAX(ID_exec)+1 FROM OS;";
+
+    int sqlExec = sqlite3_exec(db, sqlQuery.c_str(), callback, data, &SQL_errorMessage);
+    if (sqlExec != SQLITE_OK)
+    {
+        sqlQueryResult = SQL_errorMessage;
+        cout << sqlQueryResult;
+        sqlite3_free (SQL_errorMessage);
+        return 0;
+    }
+    else
+    {
+        data[strlen(data) - 1] = '\0';
+        sqlQueryResult = data;
+
+        int position = sqlQueryResult.find("=") + 1;
+        string ID_exec =sqlQueryResult.substr(position + 1, sqlQueryResult.length() - position);
+        ID_exec = ID_exec.substr(0,ID_exec.length() - 1);
+
+        cout << "ID_exec= " << ID_exec << endl;
+
+        return ID_exec;
     }
 } 
 
@@ -525,4 +548,3 @@ string numberOfAppsFound(sqlite3* db, string sqlQuery)
 
     return nrstring;
 }
-
