@@ -13,12 +13,14 @@
 #include <netdb.h>
 #include <string.h>
 #include <signal.h>
+#include <unistd.h>
 
 // CLIENT FUNCTIONS
 void errorHandling(string errmsg);
 void printInstructions();
 string readingInfo_CLIENT(int sd);
 void sendingCommand_CLIENT(int sd, int bytes, string command);
+int existing_file_check(string file_name);
 
 // SERVER FUNCTIONS
 #define PORT 2024
@@ -27,6 +29,14 @@ string readingCommand_SERVER(int client);
 void sendingInfo_SERVER(int sd);
 int numBytesSent(int client);
 
+
+int existing_file_check(string file_name)
+{
+  if(access(file_name.c_str(), F_OK) == 0) // file exists
+    return 1;
+  else
+    return -1;
+}
 
 void errorHandling(string errmsg)
 {
@@ -129,4 +139,3 @@ void sendingInfo_SERVER(int client, string information)
   else
       cout << "[server] Client has received the message.\n";
 }
- 
