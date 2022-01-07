@@ -171,13 +171,33 @@ int main ()
           cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
           sqlResponse.clear();
           sqlQuery.clear();
-
-    // inserting in OS Table
+cout << "dupa inserare in app table" << endl;
+    // Inserting in Minimum_req table
           string appID = getAppID(db,appName);
+          insertInfo.clear();
+          sqlQuery.clear();
+          sqlResponse.clear();
+
+          insertInfo.clear();
+          insertInfo = readingCommand_SERVER(client); // info to be inserted in Minimum_Req Table
+          if(insertInfo == "ERROR!")
+          {
+            printf ("[server] A client has lost connection from the server. \n");
+            close (client); 
+            exit(1);
+          }
+          cout << "Min_req table - sqlQuery: " << insertInfo << endl;
+          sqlQuery = "INSERT INTO Minimum_Req(AppID,GHzCPU, GPU, GB_RAM, GB_HDStorage) VALUES(" + appID + "," + insertInfo + ");";
+          sqlResponse = insertQuery(db, sqlQuery);
+          cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
+          sqlResponse.clear();
+cout << "dupa inserare in min_req" << endl;
+    // inserting in OS Table
           string distro_name;
           distro_name.clear();
 
           distro_name = readingCommand_SERVER(client); // OS_name to be inserted in OS table
+          cout << "distro_name=" << distro_name << endl;
 
           if(distro_name == "ERROR!")
           {
@@ -185,8 +205,6 @@ int main ()
             close (client); 
             exit(1);
           }
-
-          string exec_name;
 
           if(distro_name != "NO_distro") // client inserted a distro_name
           {
@@ -206,60 +224,41 @@ int main ()
               // yes inseamna ca clientul vrea sa faca upload la fisierul cu numele din distro_name
               // dar in tabel trebuie salvat ca si apps/"maxID_exec".extensie
               // de verificat daca nume.extensie exista in folder
-
+              
+              string exec_name;  // name.extension
               exec_name.clear();
-              exec_name = readingCommand_SERVER(client); // exec_name such as discord.deb
+              exec_name = readingCommand_SERVER(client); // exec_name such as MyApp.exe
+              cout << "exec_name="<< exec_name << endl;
               if(exec_name == "ERROR!")
               {
                 printf ("[server] A client has lost connection from the server. \n");
                 close (client); 
                 exit(1);
               }
+              if(exec_name != "FILE_DOES_NOT_EXIST")
+              {
+                string extension; // .extension from exec_name
+                extension.clear();
 
-              string extension;
-              extension.clear();
+                int pos = exec_name.find(".");
+                extension = exec_name.substr(pos,string::npos);
 
-              int pos = exec_name.find(".");
-              extension = exec_name.substr(pos,string::npos);
+                string execInsert;  //executable_name to be inserted in OS table as apps/id.extension
+                execInsert.clear();
+                execInsert = "apps/" + maxID_exec + extension;
 
-              string execInsert;  //executable_name to be inserted in OS table as apps/id.extension
-              execInsert.clear();
-              execInsert = "apps/" + maxID_exec + extension;
+                sqlQuery = "INSERT INTO OS(AppID, OS_Name, ID_exec, Executable_Name) VALUES("+ appID + ",\"" + distro_name + "\"," +  maxID_exec + ",\"" + execInsert + "\");";
+                cout << "OS table - sqlQuery: " << sqlQuery << endl;
+                sqlResponse = insertQuery(db, sqlQuery);
+                cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
+                sqlResponse.clear();
 
-              sqlQuery = "INSERT INTO OS(AppID, OS_Name, ID_exec, Executable_Name) VALUES("+ appID + ",\"" + distro_name + "\"," +  maxID_exec + ",\"" + execInsert + "\");";
-              cout << "OS table - sqlQuery: " << sqlQuery << endl;
-              sqlResponse = insertQuery(db, sqlQuery);
-              cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
-              sqlResponse.clear();
+                sqlResponse = "\nApplication inserted.\n";
+                cout << "[server] Sending back information... \n";
+                sendingInfo_SERVER(client, sqlResponse);
+              }
             }
           }
-
-
-
-
-    // Inserting in Minimum_req table
-          insertInfo.clear();
-          sqlQuery.clear();
-          sqlResponse.clear();
-
-          insertInfo.clear();
-          insertInfo = readingCommand_SERVER(client); // info to be inserted in Minimum_Req Table
-          if(insertInfo == "ERROR!")
-          {
-            printf ("[server] A client has lost connection from the server. \n");
-            close (client); 
-            exit(1);
-          }
-          cout << "Min_req table - sqlQuery: " << insertInfo << endl;
-          sqlQuery = "INSERT INTO Minimum_Req(AppID,GHzCPU, GPU, GB_RAM, GB_HDStorage) VALUES(" + appID + "," + insertInfo + ");";
-          sqlResponse = insertQuery(db, sqlQuery);
-          cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
-          sqlResponse.clear();
-
-
-          sqlResponse = "\nApplication inserted.\n";
-          cout << "[server] Sending back information... \n";
-          sendingInfo_SERVER(client, sqlResponse);
         }
 // SEARCH COMMAND
         else
@@ -294,6 +293,23 @@ int main ()
               sqlQuery = "SELECT * FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
               sqlResponse = selectQuery_SEARCH(db, sqlQuery);
               sendingInfo_SERVER(client, sqlResponse); //sending all the apps which have the criteria
+
+
+              // clientul trimite STOP sau ID_exec
+              command.clear();
+              command = readingCommand_SERVER(client);
+              if(command == "ERROR!")
+              {
+                printf ("[server] A client has lost connection from the server. \n");
+                close (client); 
+                exit(1);
+              }
+
+              if(command != "STOP") // inseamna ca s a introdus un id pt download aplicatie si trebuie verificat daca exista
+              {
+                // caca
+
+              }
 
               /*
               citire raspuns 
