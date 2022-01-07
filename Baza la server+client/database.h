@@ -63,17 +63,13 @@ static int callback_SEARCH(void* data, int argc, char** argv, char** azColName) 
     {
         if(strcmp(azColName[i], "AppID") != 0)
         {
-            strcat(information, azColName[i]);
-            strcat(information, " = ");
-            if(argv[i])
+            if((argv[i]) && (strcmp(argv[i],"-") != 0))
             {
+                strcat(information, azColName[i]);
+                strcat(information, " = ");
                 strcat(information, argv[i]);
+                strcat(information,"\n");
             }
-            else
-            {
-                strcat(information,"-");
-            }
-            strcat(information,"\n");
         }
     }
     strcat(information,"\n");
