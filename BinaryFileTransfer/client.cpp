@@ -17,7 +17,7 @@ using namespace std;
 
 int receiveFile_from_SERVER(int sd, string fname)
 {
-    FILE *fileptr = fopen(fname.c_str(), "ab"); // append binary
+    FILE *fileptr = fopen(fname.c_str(), "wb"); // binary
 
     if(fileptr == NULL)
     {
@@ -26,18 +26,31 @@ int receiveFile_from_SERVER(int sd, string fname)
     }
 
     int bytesReceived = 0;
+    int bytesRec = 0;
     char recvBuff[512];
     bzero(recvBuff,512);
 
-    while((bytesReceived = read(sd, recvBuff, 512)) > 0)
+    while(1)
     {
-        fflush(stdout);
-        fwrite(recvBuff, 1, bytesReceived, fileptr);
+        if((bytesRec = read(sd, recvBuff, 512)) < 0)
+        {
+            perror("read error in while");
+            exit(1);
+        }
+
+        if(bytesRec == 0)
+            break;
+            
+        fwrite(recvBuff, 1, bytesRec, fileptr);
+        bzero(recvBuff,512);
+
+        if( bytesRec < 512 )
+            break;
     }
 
     if(bytesReceived < 0)
     {
-        printf("\n Read Error \n");
+        printf("\nRead Error \n");
         fclose(fileptr);
         return -1;
     }
