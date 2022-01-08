@@ -301,14 +301,14 @@ int main (int argc, char *argv[])
             exit(1);
           }
           else
-          if(check_read == "UNKNOWN") // Id ul introdus este gresit
+          if(check_read == "UNKNOWN")
           {
             cout << "\n[client] Error at downloading app. Unknown ID_exec. Please try again." << endl;
           }
           else
-          if(check_read == "OK")  // id ul introdus este corect si executabilul poate fi descarcat
+          if(check_read == "OK")
           {
-            cout << "ID_exec was correct!" << endl;
+            // cout << "ID_exec was correct!" << endl;
 
             // receive_file_from_Server()
           }
