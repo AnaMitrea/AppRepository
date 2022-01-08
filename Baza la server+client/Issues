@@ -1,9 +1,10 @@
 - la search daca nu se introduce niciun criteriu sa nu dea eroare -> REZOLVAT
 - file transfer
     - de vazut cazuri in care introduce sau nu un OS distro
-- eroare la read cand se deconecteaza random -> REZOLVAT PARTIAL - de pus alt mesaj eroare
+- eroare la read cand se deconecteaza random -> REZOLVAT
 - daca nu se introduce nicio comanda, string-ul este empty si afiseaza ca "" nu este o comanda valida  -> REZOLVAT
-- modificare functie callback_search ca sa nu mai afiseze informatiile lipsa
+- modificare functie callback_search ca sa nu mai afiseze informatiile lipsa - REZOLVAT
+
 
 
 sendFile(int fd, string idkit)
