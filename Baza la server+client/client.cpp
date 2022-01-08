@@ -6,7 +6,6 @@ int main (int argc, char *argv[])
 {
   int sd;
   struct sockaddr_in server;
-  string command;		// input command
 
   // ./client <server_address> <port>
   if (argc != 3)
@@ -37,8 +36,7 @@ int main (int argc, char *argv[])
   while(1)
   {
     printInstructions();
-    int ok = 1;
-
+    string command;		// input command
     command.clear();
 
     cout << "[client] Write your command: ";
@@ -271,7 +269,7 @@ int main (int argc, char *argv[])
       }
 
       cout << check_read << endl;
-      if(check_read != "No criteria entered.")
+      if(check_read != "No criteria entered." && check_read != "[client] Try entering other criteria.")
       {
        
         cout << "[client] To download an application, write down the ID_exec from the list, otherwise, write STOP.\n";
@@ -325,7 +323,6 @@ int main (int argc, char *argv[])
       {
         cout << "\nType a command!";
       }
-      ok = 0;
     }
   }
 }
