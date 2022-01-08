@@ -269,57 +269,51 @@ int main (int argc, char *argv[])
         close(sd);
         exit(1);
       }
+
       cout << check_read << endl;
-
-      cout << "[client] To download an application, write down the ID_exec from the list, otherwise, write STOP.\n";
-      cout << "ID exec: ";
-
-      command.clear();
-      getline(cin, command);
-
-      if(command.empty() == 1 || command == "STOP") // se trimite stop
+      if(check_read != "No criteria entered.")
       {
-        command = "STOP";
-        bytes = command.length() + 1;
-        sendingCommand_CLIENT(sd, bytes, command);
-      }
-      else // s a introdus un id pt executabilul respectiv
-      {
-        bytes = command.length() + 1;
-        sendingCommand_CLIENT(sd, bytes, command);
+       
+        cout << "[client] To download an application, write down the ID_exec from the list, otherwise, write STOP.\n";
+        cout << "If any application doesn't have an ID_exec, it means that there is no executable to be downloaded. Write STOP in this case.\n";
+        cout << "ID exec: ";
 
+        command.clear();
+        getline(cin, command);
 
-        // serverul verifica .....
-
-
-        check_read.clear();
-        check_read = readingInfo_CLIENT(sd); // ok sau not ok in functie de corectitudinea id_exec
-        if(check_read == "ERROR!")
+        if(command.empty() == 1 || command == "STOP")
         {
-          errorHandling("[ERROR] Error at reading message from server.\n");
-          close(sd);
-          exit(1);
+          command = "STOP";
+          bytes = command.length() + 1;
+          sendingCommand_CLIENT(sd, bytes, command);
         }
         else
-        if(check_read == "UNKNOWN") // Id ul introdus este gresit
         {
-          cout << "Error at downloading app. Unknown ID_exec. Please try again." << endl;
-        }
-        else
-        if(check_read == "OK")  // id ul introdus este corect si executabilul poate fi descarcat
-        {
-          // ...
-        }
+          bytes = command.length() + 1;
+          sendingCommand_CLIENT(sd, bytes, command); // Sending ID_exec to server
 
+          check_read.clear();
+          check_read = readingInfo_CLIENT(sd);
+          if(check_read == "ERROR!")
+          {
+            errorHandling("[ERROR] Error at reading message from server.\n");
+            close(sd);
+            exit(1);
+          }
+          else
+          if(check_read == "UNKNOWN") // Id ul introdus este gresit
+          {
+            cout << "Error at downloading app. Unknown ID_exec. Please try again." << endl;
+          }
+          else
+          if(check_read == "OK")  // id ul introdus este corect si executabilul poate fi descarcat
+          {
+            cout << "ID_exec was correct!" << endl;
+
+            // recieve_file_from_Server()
+          }
+        }
       }
-
-
-      /*
-      cout << "Vr sa descarci o aplicatie?" << endl;
-      -> ID/NU/empty()
-
-      receive_file(fd);
-      */
     }
     else
     {
