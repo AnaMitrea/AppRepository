@@ -32,10 +32,10 @@ void sendFile_to_CLIENT(int client, string fname)
 
         if( nread > 0 )
         {
-            write( client , buff , nread );
+            write(client, buff, nread);
         }
 
-        if( nread < 1024 )
+        if( nread < 512 )
         {
             if( feof(fp) )
             {
@@ -49,7 +49,6 @@ void sendFile_to_CLIENT(int client, string fname)
             }        
         }
     }
-  
 }
 
 int existing_file_check(string file_name)
@@ -83,7 +82,7 @@ int main ()
     server_addr.sin_port = port;
     server_addr.sin_addr.s_addr = inet_addr(ip);
 
-     int enable = 1;
+    int enable = 1;
     if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
     {
         cout << "setsockopt(SO_REUSEADDR) failed.\n";
