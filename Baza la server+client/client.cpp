@@ -303,14 +303,14 @@ int main (int argc, char *argv[])
           else
           if(check_read == "UNKNOWN") // Id ul introdus este gresit
           {
-            cout << "Error at downloading app. Unknown ID_exec. Please try again." << endl;
+            cout << "\n[client] Error at downloading app. Unknown ID_exec. Please try again." << endl;
           }
           else
           if(check_read == "OK")  // id ul introdus este corect si executabilul poate fi descarcat
           {
             cout << "ID_exec was correct!" << endl;
 
-            // recieve_file_from_Server()
+            // receive_file_from_Server()
           }
         }
       }
