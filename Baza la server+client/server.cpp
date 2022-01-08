@@ -26,13 +26,13 @@ int main ()
 
   if (signal (SIGCHLD, (sighandler_t)sighandler) == SIG_ERR)
   {
-    errorHandling("[server]Error signal().\n");
+    errorHandling("[server] Error signal().\n");
     return 0;
   }
 
   if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1)
   {
-    errorHandling("[server]Error socket().\n");
+    errorHandling("[server] Error socket().\n");
     return 0;
   }
 
@@ -53,13 +53,13 @@ int main ()
 
   if (bind (sd, (struct sockaddr *) &server, sizeof (struct sockaddr)) == -1)
   {
-    errorHandling("[server]Error bind().\n");
+    errorHandling("[server] Error bind().\n");
     return 0;
   }
 
   if (listen (sd, 5) == -1) // queue of 5 
   {
-    errorHandling("[server]Error listen().\n");
+    errorHandling("[server] Error listen().\n");
     return 0;
   }
 
@@ -164,17 +164,13 @@ int main ()
           }
 
           sqlQuery.clear();
-
           sqlQuery = "INSERT INTO Application(AppName, Developer, License, Category, InternetConnection, AppInfo) VALUES(" + insertInfo + ");";
           cout << "Application table - sqlQuery: " << sqlQuery << endl;
           sqlResponse = insertQuery(db, sqlQuery);
           cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
-          sqlResponse.clear();
-          sqlQuery.clear();
 
     // Inserting in Minimum_req table
           string appID = getAppID(db,appName);
-          insertInfo.clear();
           sqlQuery.clear();
           sqlResponse.clear();
 
@@ -220,10 +216,6 @@ int main ()
 
             if(command == "YES")
             {
-              // yes inseamna ca clientul vrea sa faca upload la fisierul cu numele din distro_name
-              // dar in tabel trebuie salvat ca si apps/"maxID_exec".extensie
-              // de verificat daca nume.extensie exista in folder
-              
               string exec_name;  // name.extension
               exec_name.clear();
               exec_name = readingCommand_SERVER(client); // exec_name such as MyApp.exe
@@ -279,7 +271,7 @@ int main ()
 
           cout << "Search criteria: \"" <<  searchInfo << "\"." << endl;
           
-          if(searchInfo.empty() == 0) // nu e empty
+          if(searchInfo.empty() == 0)
           {
             sqlQuery = "SELECT COUNT(DISTINCT AppName) as 'c' FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
 
@@ -294,8 +286,6 @@ int main ()
               sqlResponse = selectQuery_SEARCH(db, sqlQuery);
               sendingInfo_SERVER(client, sqlResponse); //sending all the apps which have the criteria
 
-
-              // clientul trimite STOP sau ID_exec
               command.clear();
               command = readingCommand_SERVER(client);
 
@@ -307,27 +297,22 @@ int main ()
                 exit(1);
               }
 
-              if(command != "STOP") // inseamna ca s a introdus un id pt download aplicatie si trebuie verificat daca exista
+              if(command != "STOP")
               {
-                cout << "[server] Verifying ID_exec...";
+                cout << "[server] Verifying ID_exec... ";
                 sqlQuery.clear();
                 sqlQuery = "SELECT COUNT(ID_exec) as 'c' FROM OS WHERE ID_exec=" + command + ";";
                 appsFound = numberOfAppsFound(db, sqlQuery);
 
-                string msg;
-                msg.clear();
-
                 if(appsFound == "0") // ID_exec not found which means that there is no app executable in database
                 {
                   cout << "Unknown ID_exec." << endl;
-                  msg = "UNKNOWN";
-                  sendingInfo_SERVER(client, msg);
+                  sendingInfo_SERVER(client, "UNKNOWN");
                 }
                 else
                 {
                   cout << "Known ID_exec." << endl;
-                  msg = "OK";
-                  sendingInfo_SERVER(client, msg);
+                  sendingInfo_SERVER(client, "OK");
 
                   // send_File_to_Client();
                 }
