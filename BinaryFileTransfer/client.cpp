@@ -1,31 +1,60 @@
+#include <string>
+#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#include <string>
-#include <sys/wait.h>
 #include <netdb.h>
+#include <string.h>
 #include <signal.h>
+#include <unistd.h>
 #include <iostream>
 using namespace std;
 
-int port = 8080;
+
+int receiveFile_from_SERVER(int sd, string fname)
+{
+    FILE *fileptr = fopen(fname.c_str(), "ab"); // append binary
+
+    if(fileptr == NULL)
+    {
+        printf("Error opening file");
+        return -1;
+    }
+
+    int bytesReceived = 0;
+    char recvBuff[512];
+    bzero(recvBuff,512);
+
+    while((bytesReceived = read(sd, recvBuff, 512)) > 0)
+    {
+        fflush(stdout);
+        fwrite(recvBuff, 1, bytesReceived, fileptr);
+    }
+
+    if(bytesReceived < 0)
+    {
+        printf("\n Read Error \n");
+        fclose(fileptr);
+        return -1;
+    }
+
+    fclose(fileptr);
+    return 1;
+}
+
 
 int main()
 {
-    char *ip = (char*)"127.0.0.1";
+    char *ip = (char*)"127.0.0.2";
+    int port = 8080;
     int e;
 
     int sd;
     struct sockaddr_in server_addr;
-
-    FILE *fp;
-
 
     sd = socket(AF_INET, SOCK_STREAM, 0);
     if(sd<0)
@@ -39,8 +68,7 @@ int main()
     server_addr.sin_port = port;
     server_addr.sin_addr.s_addr = inet_addr(ip);
 
-    e = connect(sd, (struct sockaddr*)&server_addr, sizeof(server_addr));
-    if(e == -1)
+    if(connect(sd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
     {
         perror("[-]Error in Connecting");
         exit(1);
@@ -48,52 +76,15 @@ int main()
 
     printf("[+]Connected to server.\n");
 
-    cout << "File name: ";
-    string msg;
-    msg.clear();
-    fflush(stdout);
-    getline(cin,msg);
-
-    char *filename = (char*)msg.c_str();
-    cout << "filename= \"" << filename << "\"\n";
-
-    fp = fopen(filename, "rb"); //opening a binary file
-    if(fp == NULL)
-    {
-        perror("[-]Error in reading file.");
-        exit(1);
-    }
 
 
-    /* Read data from file and send it */
-    while(1)
-    {
-        unsigned char buff[1024];
-        memset(buff, 0, 1024);
-        int nread; //= fread(buff,1,1024,fp);
-        if((nread = fread(buff, 1, 1024, fp)) > 0)
-        {
-            write(sd, buff, nread);
-        }
+    int ok = receiveFile_from_SERVER(sd,"discord2.deb");
+    cout << "ok= " << ok << endl;
 
-        if(nread < 1024)
-        {
-            if(feof(fp)) // EOF
-            {
-                printf("End of file\n");
-                break;
-            }
-            if(ferror(fp))
-            {
-                printf("error reading");
-                break;
-            }        
-        }
-    }
 
+    
     close(sd);
-    fclose(fp);
-
+    
     return 0;
 
 }
