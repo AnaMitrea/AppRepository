@@ -95,7 +95,7 @@ int numBytesSent(int client)
   int bytes_sent;
   if (read (client, &bytes_sent, sizeof(int)) <= 0) 
   {
-    cout << "[server] Error at reading num bytes from client.\n";
+    cout << "[server] Error at reading num bytes from client. Client has been disconnected.\n";
     close(client);
     exit(1);
   }
