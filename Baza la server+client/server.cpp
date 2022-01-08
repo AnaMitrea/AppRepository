@@ -281,7 +281,7 @@ int main ()
           
           if(searchInfo.empty() == 0) // nu e empty
           {
-            sqlQuery = "SELECT COUNT(DISTINCT AppName) FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
+            sqlQuery = "SELECT COUNT(DISTINCT AppName) as 'c' FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
 
             string appsFound = numberOfAppsFound(db, sqlQuery);
             string found = "[Found " + appsFound + " programs for the written criteria]";
@@ -309,25 +309,23 @@ int main ()
 
               if(command != "STOP") // inseamna ca s a introdus un id pt download aplicatie si trebuie verificat daca exista
               {
+                cout << "[server] Verifying ID_exec...";
                 sqlQuery.clear();
-                sqlQuery = "SELECT COUNT(ID_exec) FROM OS WHERE ID_exec=" + command + ";";
-
-                sqlResponse.clear();
-                sqlResponse = selectQuery_SEARCH(db, sqlQuery);
-
-                string appsFound = sqlResponse.substr(15,string::npos);
-                appsFound = appsFound.substr(0,appsFound.length() - 1);
+                sqlQuery = "SELECT COUNT(ID_exec) as 'c' FROM OS WHERE ID_exec=" + command + ";";
+                appsFound = numberOfAppsFound(db, sqlQuery);
 
                 string msg;
                 msg.clear();
 
                 if(appsFound == "0") // ID_exec not found which means that there is no app executable in database
                 {
+                  cout << "Unknown ID_exec." << endl;
                   msg = "UNKNOWN";
                   sendingInfo_SERVER(client, msg);
                 }
                 else
                 {
+                  cout << "Known ID_exec." << endl;
                   msg = "OK";
                   sendingInfo_SERVER(client, msg);
 
@@ -337,12 +335,12 @@ int main ()
             }
             else
             {
-              sendingInfo_SERVER(client, "Try entering other criteria.");
+              sendingInfo_SERVER(client, "[client] Try entering other criteria.");
             }
           }
           else
           {
-            sendingInfo_SERVER(client, "Found 0 programs.");
+            sendingInfo_SERVER(client, "[client] Found 0 programs.");
             sendingInfo_SERVER(client, "No criteria entered.");
           }
           
