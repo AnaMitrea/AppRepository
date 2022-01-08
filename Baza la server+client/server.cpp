@@ -171,7 +171,7 @@ int main ()
           cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
           sqlResponse.clear();
           sqlQuery.clear();
-cout << "dupa inserare in app table" << endl;
+
     // Inserting in Minimum_req table
           string appID = getAppID(db,appName);
           insertInfo.clear();
@@ -191,13 +191,12 @@ cout << "dupa inserare in app table" << endl;
           sqlResponse = insertQuery(db, sqlQuery);
           cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
           sqlResponse.clear();
-cout << "dupa inserare in min_req" << endl;
+
     // inserting in OS Table
           string distro_name;
           distro_name.clear();
 
           distro_name = readingCommand_SERVER(client); // OS_name to be inserted in OS table
-          cout << "distro_name=" << distro_name << endl;
 
           if(distro_name == "ERROR!")
           {
@@ -228,7 +227,7 @@ cout << "dupa inserare in min_req" << endl;
               string exec_name;  // name.extension
               exec_name.clear();
               exec_name = readingCommand_SERVER(client); // exec_name such as MyApp.exe
-              cout << "exec_name="<< exec_name << endl;
+
               if(exec_name == "ERROR!")
               {
                 printf ("[server] A client has lost connection from the server. \n");
@@ -248,6 +247,7 @@ cout << "dupa inserare in min_req" << endl;
                 execInsert = "apps/" + maxID_exec + extension;
 
                 sqlQuery = "INSERT INTO OS(AppID, OS_Name, ID_exec, Executable_Name) VALUES("+ appID + ",\"" + distro_name + "\"," +  maxID_exec + ",\"" + execInsert + "\");";
+                
                 cout << "OS table - sqlQuery: " << sqlQuery << endl;
                 sqlResponse = insertQuery(db, sqlQuery);
                 cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
@@ -290,7 +290,7 @@ cout << "dupa inserare in min_req" << endl;
             if(appsFound != "0")
             {
               sqlQuery.clear();
-              sqlQuery = "SELECT * FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
+              sqlQuery = "SELECT * FROM Application LEFT JOIN Minimum_Req USING(AppID) LEFT JOIN OS USING(AppID) WHERE " + searchInfo + ";";
               sqlResponse = selectQuery_SEARCH(db, sqlQuery);
               sendingInfo_SERVER(client, sqlResponse); //sending all the apps which have the criteria
 
@@ -298,6 +298,8 @@ cout << "dupa inserare in min_req" << endl;
               // clientul trimite STOP sau ID_exec
               command.clear();
               command = readingCommand_SERVER(client);
+
+              cout << "Written command: \"" << command << "\".\n";
               if(command == "ERROR!")
               {
                 printf ("[server] A client has lost connection from the server. \n");
@@ -307,19 +309,31 @@ cout << "dupa inserare in min_req" << endl;
 
               if(command != "STOP") // inseamna ca s a introdus un id pt download aplicatie si trebuie verificat daca exista
               {
-                // caca
+                sqlQuery.clear();
+                sqlQuery = "SELECT COUNT(ID_exec) FROM OS WHERE ID_exec=" + command + ";";
 
+                sqlResponse.clear();
+                sqlResponse = selectQuery_SEARCH(db, sqlQuery);
+
+                string appsFound = sqlResponse.substr(15,string::npos);
+                appsFound = appsFound.substr(0,appsFound.length() - 1);
+
+                string msg;
+                msg.clear();
+
+                if(appsFound == "0") // ID_exec not found which means that there is no app executable in database
+                {
+                  msg = "UNKNOWN";
+                  sendingInfo_SERVER(client, msg);
+                }
+                else
+                {
+                  msg = "OK";
+                  sendingInfo_SERVER(client, msg);
+
+                  // send_File_to_Client();
+                }
               }
-
-              /*
-              citire raspuns 
-
-              msg != nu 
-
-                idkit
-
-                send_file(fd, idkit)
-              */
             }
             else
             {
