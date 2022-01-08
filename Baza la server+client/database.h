@@ -537,11 +537,13 @@ string searchApps()
 
 string numberOfAppsFound(sqlite3* db, string sqlQuery)
 {
-    string sqlResponse; // sql query response
+    string sqlResponse;
+    sqlResponse.clear();
     sqlResponse = selectQuery_SEARCH(db, sqlQuery);
+    sqlResponse.pop_back();
 
-    string nrstring = sqlResponse.substr(26,string::npos);
-    nrstring = nrstring.substr(0,nrstring.length() - 1);
+    string appsFound = sqlResponse.substr(4,string::npos);
+    appsFound = appsFound.substr(0,appsFound.length());
 
-    return nrstring;
+    return appsFound;
 }
