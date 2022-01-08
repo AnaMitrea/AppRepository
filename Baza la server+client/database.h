@@ -64,7 +64,7 @@ static int callback_SEARCH(void* data, int argc, char** argv, char** azColName) 
     {
         if(strcmp(azColName[i], "AppID") != 0 && strcmp(azColName[i], "Executable_Name") != 0)
         {
-            if((argv[i]) && (strcmp(argv[i],"-") != 0))
+            if(strcmp(argv[i],"-") != 0)
             {
                 strcat(information, azColName[i]);
                 strcat(information, " = ");
@@ -548,4 +548,3 @@ string numberOfAppsFound(sqlite3* db, string sqlQuery)
 
     return nrstring;
 }
- 
