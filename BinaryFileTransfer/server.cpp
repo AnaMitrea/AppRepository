@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -6,26 +5,71 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <netdb.h>
 #include <string.h>
 #include <signal.h>
+#include <unistd.h>
 #include <iostream>
 using namespace std;
 
-#define SIZE 1024
-int port = 8080;
+void sendFile_to_CLIENT(int client, string fname)
+{
+    FILE* fp = fopen(fname.c_str(),"rb");
+    if(fp == NULL)
+    {
+        perror("[-]Error in reading file.");
+        exit(1);
+    }
+
+    while(1)
+    {
+        unsigned char buff[512];
+        bzero(buff,512);
+
+        int nread = fread(buff,1,512,fp);
+
+        if( nread > 0 )
+        {
+            write( client , buff , nread );
+        }
+
+        if( nread < 1024 )
+        {
+            if( feof(fp) )
+            {
+                printf("End of file\n");
+                break;
+            }
+            if(ferror(fp))
+            {
+                printf("error reading");
+                break;
+            }        
+        }
+    }
+  
+}
+
+int existing_file_check(string file_name)
+{
+  if(access(file_name.c_str(), F_OK) == 0) // file exists
+    return 1;
+  else
+    return -1;
+}
 
 int main ()
 {
-    char *ip = (char*)"127.0.0.1";
-    
+    char *ip = (char*)"127.0.0.2";
+    int port = 8080;
     int e;
 
-    int sd, new_sd;
+    int sd, client;
     struct sockaddr_in server_addr, new_addr;
     socklen_t addr_size;
-    char buffer[SIZE];
+    char buffer[512];
 
     sd = socket(AF_INET, SOCK_STREAM, 0);
     if(sd<0)
@@ -39,52 +83,48 @@ int main ()
     server_addr.sin_port = port;
     server_addr.sin_addr.s_addr = inet_addr(ip);
 
-    if(bind(sd,(struct sockaddr*)&server_addr, sizeof(server_addr)) < 0)
+     int enable = 1;
+    if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+    {
+        cout << "setsockopt(SO_REUSEADDR) failed.\n";
+        return 0;
+    }
+
+    if(bind(sd,(struct sockaddr*)&server_addr, sizeof(server_addr))<0)
     {
         perror("[-]Error in Binding");
         exit(1);
     }
     printf("[+]Binding Successfull.\n");
 
-    if(listen(sd, 5) ==0)
+    if(listen(sd, 5) == -1)
     {
-        printf("[+]Listening...\n");
-    }
-    else 
-    {
-        perror("[-]Error in Binding");
+        perror("[-]Error in listen");
         exit(1);
     }
+
+    printf("[+]Listening...\n");
+
     addr_size = sizeof(new_addr);
-    new_sd = accept(sd,(struct sockaddr*)&new_addr, &addr_size);
+    client = accept(sd,(struct sockaddr*)&new_addr, &addr_size);
 
 
-    // aici primeste numele fisierului
-    FILE *fp;
-    fp = fopen("discord2.deb", "ab");
 
-    if(NULL == fp)
+
+
+
+    if(existing_file_check("apps/discord.exe") == -1)
     {
-        printf("Error opening file");
-        return 1;
+        cout << "Error: File doesn't exist!" << endl;
+        close(client);
+        close(sd);
+        return 0;
     }
+    
+    sendFile_to_CLIENT(client,"apps/discord.deb");
 
-    int bytesReceived = 0;
-    char recvBuff[1024];
 
-    while ( (bytesReceived = read(new_sd, recvBuff, 1024)) > 0 )
-    {
-        fflush(stdout);
-        fwrite(recvBuff, 1, bytesReceived, fp);
-    }
-
-    if(bytesReceived < 0)
-    {
-        printf("\n Read Error \n");
-    }
-    printf("\nFile OK....Completed\n");
-
-    fclose(fp);
-    close(new_sd);
+    
+    close(client);
     close(sd);
 }
