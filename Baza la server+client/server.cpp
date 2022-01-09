@@ -318,19 +318,14 @@ int main ()
                   sqlResponse.clear();
                   sqlResponse = selectQuery_SEARCH(db, sqlQuery);
                   sqlResponse = sqlResponse.substr(0,sqlResponse.length()-1);
-                  cout << "sqlResponse: \""<< sqlResponse << "\" and ";
 
                   string fname_for_client = sqlResponse.substr(9,string::npos);
                   string fname_for_server = sqlResponse.substr(4,string::npos);
 
-                  cout << "fname_for_client = \"" << fname_for_client << "\"\n";
-                  cout << "fname_for_server = \"" << fname_for_server << "\"\n";
-
                   sendingInfo_SERVER(client, fname_for_client);
-
-                  cout << "inainte de sendingfile\n";
+                  
+                  cout << "- Sending file to client...\n";
                   sendFile_to_CLIENT(client,fname_for_server);
-                  cout << "dupa sendingfile\n";
                 }
               }
             }
