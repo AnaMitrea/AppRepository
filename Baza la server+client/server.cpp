@@ -259,8 +259,22 @@ int main ()
                 sqlResponse = "\nApplication was added succesfully.";
                 cout << "[server] Sending back information... \n";
                 sendingInfo_SERVER(client, sqlResponse);
-
               }
+            }
+            else
+            {
+              sqlQuery.clear();
+              sqlQuery = "INSERT INTO OS(AppID, OS_Name) VALUES("+ appID + ",\"" + distro_name + "\");";
+              cout << "OS table - sqlQuery: " << sqlQuery << endl;
+
+              sqlResponse.clear();
+              sqlResponse = insertQuery(db, sqlQuery);
+              cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
+              
+              sqlResponse.clear();
+              sqlResponse = "\nApplication was added succesfully.";
+              cout << "[server] Sending back information... \n";
+              sendingInfo_SERVER(client, sqlResponse);
             }
           }
         }
@@ -351,6 +365,8 @@ int main ()
             sendingInfo_SERVER(client, "[client] Found 0 programs.");
             sendingInfo_SERVER(client, "No criteria entered.");
           }
+          
+         
           sqlQuery.clear();
           sqlResponse.clear();
           searchInfo.clear();
