@@ -292,6 +292,7 @@ int main (int argc, char *argv[])
 
           check_read.clear();
           check_read = readingInfo_CLIENT(sd);
+
           if(check_read == "ERROR!")
           {
             errorHandling("[ERROR] Error at reading message from server.\n");
@@ -304,11 +305,11 @@ int main (int argc, char *argv[])
             cout << "\n[client] Error at downloading app. Unknown ID_exec. Please try again." << endl;
           }
           else
-          if(check_read == "OK")
           {
-            // cout << "ID_exec was correct!" << endl;
+            cout << "ID_exec was found!" << endl;
 
-            // receive_file_from_Server()
+            int check_received = receiveFile_from_SERVER(sd,check_read);
+            cout << "check_received: " << check_received << endl;
           }
         }
       }
