@@ -245,9 +245,21 @@ int main ()
                 cout << endl << sqlResponse << endl; // Inserting Query succeeded or not
                 sqlResponse.clear();
 
-                sqlResponse = "\nApplication inserted.";
+                cout << "[server] Receiving file from client...\n";
+                int check_file_receive = receiveFile_from_CLIENT(client, execInsert);
+                if(check_file_receive == -1)
+                {
+                  cout << "- Error : File was not received.\n";
+                }
+                else
+                {
+                  cout << "- File received succesfully.\n";
+                }
+
+                sqlResponse = "\nApplication was added succesfully.";
                 cout << "[server] Sending back information... \n";
                 sendingInfo_SERVER(client, sqlResponse);
+
               }
             }
           }
@@ -339,8 +351,6 @@ int main ()
             sendingInfo_SERVER(client, "[client] Found 0 programs.");
             sendingInfo_SERVER(client, "No criteria entered.");
           }
-          
-         
           sqlQuery.clear();
           sqlResponse.clear();
           searchInfo.clear();
