@@ -194,10 +194,6 @@ int main (int argc, char *argv[])
             getline(cin, exec_name);
           }
 
-          // de verificat daca exista fisierul
-          // daca exista -> trimit exec_name la server
-          // daca nu exista -> trimit un mesaj de eroare
-
           int check_file = existing_file_check(exec_name);
           if(check_file == 1) // file exists -> sending to server the executable name
           {
@@ -230,6 +226,17 @@ int main (int argc, char *argv[])
         {
           bytes = command.length() + 1;
           sendingCommand_CLIENT(sd, bytes, command);
+
+          string check_read;
+          check_read.clear();
+          check_read = readingInfo_CLIENT(sd); //Application inserted or not.
+          if(check_read == "ERROR!")
+          {
+            errorHandling("[ERROR] Error at reading message from server.\n");
+            close(sd);
+            exit(1);
+          }
+          cout << check_read << endl;
         }
       }
     }
