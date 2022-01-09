@@ -20,7 +20,8 @@ void errorHandling(string errmsg);
 void printInstructions();
 string readingInfo_CLIENT(int sd);
 void sendingCommand_CLIENT(int sd, int bytes, string command);
-int existing_file_check(string file_name);
+int existing_file_check(string fname);
+int receiveFile_from_SERVER(int sd, string fname);
 
 // SERVER FUNCTIONS
 #define PORT 2024
@@ -28,11 +29,94 @@ void sighandler();
 string readingCommand_SERVER(int client);
 void sendingInfo_SERVER(int sd);
 int numBytesSent(int client);
+void sendFile_to_CLIENT(int client, string fname);
 
 
-int existing_file_check(string file_name)
+int receiveFile_from_SERVER(int sd, string fname)
 {
-  if(access(file_name.c_str(), F_OK) == 0) // file exists
+    FILE *fileptr = fopen(fname.c_str(), "wb"); // binary
+
+    if(fileptr == NULL)
+    {
+      printf("Error opening file");
+      return -1;
+    }
+
+    int bytesReceived = 0;
+    int bytesRec = 0;
+    char recvBuff[512];
+    bzero(recvBuff,512);
+
+    while(1)
+    {
+      if((bytesRec = read(sd, recvBuff, 512)) < 0)
+      {
+        perror("read error in while");
+        exit(1);
+      }
+
+      if(bytesRec == 0)
+        break;
+          
+      fwrite(recvBuff, 1, bytesRec, fileptr);
+      bzero(recvBuff,512);
+
+      if( bytesRec < 512 )
+        break;
+    }
+
+    if(bytesReceived < 0)
+    {
+      printf("\nRead Error \n");
+      fclose(fileptr);
+      return -1;
+    }
+
+    fclose(fileptr);
+    return 1;
+}
+
+void sendFile_to_CLIENT(int client, string fname)
+{
+  FILE* fp = fopen(fname.c_str(),"rb");
+  if(fp == NULL)
+  {
+    perror("[-]Error in reading file.");
+    exit(1);
+  }
+
+  while(1)
+  {
+    unsigned char buff[512];
+    bzero(buff,512);
+
+    int nread = fread(buff,1,512,fp);
+
+    if( nread > 0 )
+    {
+      write(client, buff, nread);
+    }
+
+    if( nread < 512 )
+    {
+      if( feof(fp) )
+      {
+        printf("End of file\n");
+        break;
+      }
+      if(ferror(fp))
+      {
+        printf("error reading");
+        break;
+      }        
+    }
+  }
+}
+
+
+int existing_file_check(string fname)
+{
+  if(access(fname.c_str(), F_OK) == 0) // file exists
     return 1;
   else
     return -1;
@@ -124,18 +208,17 @@ void sendingInfo_SERVER(int client, string information)
 
   if (write (client, &bytes, sizeof(int)) <= 0)
   {
-      cout << "[server] Error at writting num bytes for client. Client disconnected.\n";
-      close(client);  
-      exit(1);
+    cout << "[server] Error at writting num bytes for client. Client disconnected.\n";
+    close(client);  
+    exit(1);
   }
 
-  // trimitere comanda la server
   if (write (client, information.c_str(), bytes) <= 0)
   {
-      cout << "[server] Error at writting command for client. Client disconnected.\n";
-      close(client);  
-      exit(1);
+    cout << "[server] Error at writting command for client. Client disconnected.\n";
+    close(client);  
+    exit(1);
   }
   else
-      cout << "[server] Client has received the message.\n";
+    cout << "[server] Client has received the message.\n";
 }
