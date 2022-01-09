@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
     
     if(inputCommand == "Insert") // Insert app
     {
-        insertInfo = insertValues_Application(db);
+        insertInfo = insertValues_Application();
         sqlQuery.clear();
 
         sqlQuery = "INSERT INTO Application(AppName, Developer, Executable_name, License, Category, InternetConnection, AppInfo) VALUES(" + insertInfo + ");";
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
         insertInfo.clear();
 
         insertInfo = insertValues_Minimum_Req();
-        sqlQuery = "INSERT INTO Minimum_Req(AppID,GHzCPU, GPU, GB_RAM, GB_HDStorage) VALUES(" + appID + "," +insertInfo + ");";
+        sqlQuery = "INSERT INTO Minimum_Req(AppID,GHzCPU, GPU, GB_RAM, GB_HDStorage) VALUES(" + appID + "," + insertInfo + ");";
 
         sqlResponse = insertQuery(db, sqlQuery);
         cout << sqlResponse << endl;
@@ -116,12 +116,13 @@ int main(int argc, char* argv[])
 
     }
     else
-    if(inputCommand == "Search")          // cautare in db
+    if(inputCommand == "Search")
     {
         sqlQuery.clear();
         searchInfo.clear();
         cinBuffer.clear();
 
+        // toate astea trebuie intr un singur mesaj si trimise catre client.
         cout << "\nCriteria available:\n";
         cout << "- App's Name\n";
         cout << "- Developer\n";
@@ -133,21 +134,22 @@ int main(int argc, char* argv[])
         cout << "- RAM\n";
         cout << "- Hard Disk Storage\n\n";
 
-        searchInfo = searchApps(db);
- 
+        searchInfo = searchApps();
         sqlQuery = "SELECT COUNT(DISTINCT AppName) FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
 
-        int appsFound = numberOfAppsFound(db, sqlQuery);
+        string appsFound = numberOfAppsFound(db, sqlQuery);
         cout << "Found "<< appsFound << " programs for the criteria. \n\n";
+
         sqlQuery.clear();
 
         sqlQuery = "SELECT * FROM Application LEFT JOIN OS USING(AppID) LEFT JOIN Minimum_Req USING(AppID) WHERE " + searchInfo + ";";
 
         sqlResponse = selectQuery_SEARCH(db, sqlQuery);
         cout << sqlResponse << endl;
-        sqlQuery.clear();
 
- 
+
+        sqlQuery.clear();
+        sqlResponse.clear();
     }
     sqlite3_close(db);
     return 0;
