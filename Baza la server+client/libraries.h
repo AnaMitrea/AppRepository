@@ -22,6 +22,7 @@ string readingInfo_CLIENT(int sd);
 void sendingCommand_CLIENT(int sd, int bytes, string command);
 int existing_file_check(string fname);
 int receiveFile_from_SERVER(int sd, string fname);
+void sendFile_to_SERVER(int sd, string fname);
 
 // SERVER FUNCTIONS
 #define PORT 2024
@@ -30,52 +31,137 @@ string readingCommand_SERVER(int client);
 void sendingInfo_SERVER(int sd);
 int numBytesSent(int client);
 void sendFile_to_CLIENT(int client, string fname);
+int receiveFile_from_CLIENT(int client, string fname);
 
+
+int receiveFile_from_CLIENT(int client, string fname) // file saves as apps/nr.extension
+{
+  FILE *fileptr = fopen(fname.c_str(), "wb"); // binary
+  if(fileptr == NULL)
+  {
+    cout << "[server] Error - File couldn't be opened/created!";
+    return -1;
+  }
+
+  int bytesRec = 0;
+  char information[512];
+  bzero(information, 512);
+
+  while(1)
+  {
+    if((bytesRec = read(client, information, 512)) < 0)
+    {
+      cout << "[server] Reading error\n";
+      fclose(fileptr);
+      exit(1);
+    }
+    else
+    if(bytesRec == 0)
+    {
+      break;
+    }
+  
+    fwrite(information,1,bytesRec,fileptr);
+    bzero(information,512);
+
+    if(bytesRec < 512) // the last bytes of the executable
+    {
+      break;
+    }
+  }
+
+  if(bytesRec < 0)
+  {
+    cout << "[client] Reading error\n";
+    fclose(fileptr);
+    return -1;
+  }
+
+  fclose(fileptr);
+  return 1;
+}
+
+void sendFile_to_SERVER(int sd, string fname) //file name as nr.extension
+{
+  FILE* ptr = fopen(fname.c_str(),"rb");
+  if(ptr == NULL)
+  {
+    cout << "[client] Reading file error.\n";
+    exit(1);
+  }
+
+  unsigned char buff[512];
+  while(1)
+  {
+    bzero(buff,512);
+
+    int bytesSent = fread(buff,1,512,ptr);
+    if(bytesSent > 0)
+    {
+      write(sd,buff,bytesSent);
+    }
+
+    if(bytesSent < 512)
+    {
+      if(feof(ptr))
+      {
+        cout << "[client] File was sent succesfully.\n";
+        break;
+      }
+      if(ferror(ptr))
+      {
+        cout << "[client] Reading file error.\n";
+        break;
+      }        
+    }
+  }
+}
 
 int receiveFile_from_SERVER(int sd, string fname)
 {
-    FILE *fileptr = fopen(fname.c_str(), "wb"); // binary
-    if(fileptr == NULL)
-    {
-      cout << "[client] Error - File couldn't be opened/created!";
-      return -1;
-    }
+  FILE *fileptr = fopen(fname.c_str(), "wb"); // binary
+  if(fileptr == NULL)
+  {
+    cout << "[client] Error - File couldn't be opened/created!";
+    return -1;
+  }
 
-    int bytesRec = 0;
-    char information[512];
-    bzero(information, 512);
+  int bytesRec = 0;
+  char information[512];
+  bzero(information, 512);
 
-    while(1)
-    {
-      if((bytesRec = read(sd, information, 512)) < 0)
-      {
-        cout << "[client] Reading error\n";
-        exit(1);
-      }
-      else
-      if(bytesRec == 0)
-      {
-        break;
-      }
-   
-      fwrite(information, 1, bytesRec, fileptr);
-      bzero(information,512);
-
-      if(bytesRec < 512) // the last bytes of the executable
-      {
-        break;
-      }
-    }
-
-    if(bytesRec < 0)
+  while(1)
+  {
+    if((bytesRec = read(sd, information, 512)) < 0)
     {
       cout << "[client] Reading error\n";
       fclose(fileptr);
-      return -1;
+      exit(1);
     }
+    else
+    if(bytesRec == 0)
+    {
+      break;
+    }
+  
+    fwrite(information,1,bytesRec,fileptr);
+    bzero(information,512);
 
+    if(bytesRec < 512) // the last bytes of the executable
+    {
+      break;
+    }
+  }
+
+  if(bytesRec < 0)
+  {
+    cout << "[client] Reading error\n";
     fclose(fileptr);
-    return 1;
+    return -1;
+  }
+
+  fclose(fileptr);
+  return 1;
 }
 
 void sendFile_to_CLIENT(int client, string fname)
@@ -107,13 +193,12 @@ void sendFile_to_CLIENT(int client, string fname)
       }
       if(ferror(ptr))
       {
-        cout << "- Reading file error.";
+        cout << "- Reading file error.\n";
         break;
       }        
     }
   }
 }
-
 
 int existing_file_check(string fname)
 {
