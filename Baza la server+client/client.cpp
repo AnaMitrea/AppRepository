@@ -306,10 +306,17 @@ int main (int argc, char *argv[])
           }
           else
           {
-            cout << "ID_exec was found!" << endl;
+            cout << "Downloading file...\n";
 
             int check_received = receiveFile_from_SERVER(sd,check_read);
-            cout << "check_received: " << check_received << endl;
+            if(check_received == -1)
+            {
+              cout << "[client] Error - Downloading stopped... File is corrupted.\n";
+            }
+            else
+            {
+              cout << "Downloading completed!\n";
+            }
           }
         }
       }
