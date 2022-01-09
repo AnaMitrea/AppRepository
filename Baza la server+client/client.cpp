@@ -204,7 +204,8 @@ int main (int argc, char *argv[])
             bytes = exec_name.length() + 1;
             sendingCommand_CLIENT(sd, bytes, exec_name); // exec_name
 
-            // sendFile_to_server()
+            cout << "- Sending file...\n";
+            sendFile_to_SERVER(sd,exec_name);
 
             string check_read;
             check_read.clear();
@@ -273,7 +274,7 @@ int main (int argc, char *argv[])
       {
        
         cout << "[client] To download an application, write down the ID_exec from the list, otherwise, write STOP.\n";
-        cout << "If any application doesn't have an ID_exec, it means that there is no executable to be downloaded. Write STOP in this case.\n";
+        cout << "If all the applications don't have any ID_exec, it means that there is no executable to be downloaded.Write STOP in this case.\n";
         cout << "ID exec: ";
 
         command.clear();
