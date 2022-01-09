@@ -35,39 +35,41 @@ void sendFile_to_CLIENT(int client, string fname);
 int receiveFile_from_SERVER(int sd, string fname)
 {
     FILE *fileptr = fopen(fname.c_str(), "wb"); // binary
-
     if(fileptr == NULL)
     {
-      printf("Error opening file");
+      cout << "[client] Error - File couldn't be opened/created!";
       return -1;
     }
 
-    int bytesReceived = 0;
     int bytesRec = 0;
-    char recvBuff[512];
-    bzero(recvBuff,512);
+    char information[512];
+    bzero(information, 512);
 
     while(1)
     {
-      if((bytesRec = read(sd, recvBuff, 512)) < 0)
+      if((bytesRec = read(sd, information, 512)) < 0)
       {
-        perror("read error in while");
+        cout << "[client] Reading error\n";
         exit(1);
       }
-
+      else
       if(bytesRec == 0)
+      {
         break;
-          
-      fwrite(recvBuff, 1, bytesRec, fileptr);
-      bzero(recvBuff,512);
+      }
+   
+      fwrite(information, 1, bytesRec, fileptr);
+      bzero(information,512);
 
-      if( bytesRec < 512 )
+      if(bytesRec < 512) // the last bytes of the executable
+      {
         break;
+      }
     }
 
-    if(bytesReceived < 0)
+    if(bytesRec < 0)
     {
-      printf("\nRead Error \n");
+      cout << "[client] Reading error\n";
       fclose(fileptr);
       return -1;
     }
@@ -78,35 +80,34 @@ int receiveFile_from_SERVER(int sd, string fname)
 
 void sendFile_to_CLIENT(int client, string fname)
 {
-  FILE* fp = fopen(fname.c_str(),"rb");
-  if(fp == NULL)
+  FILE* ptr = fopen(fname.c_str(),"rb");
+  if(ptr == NULL)
   {
-    perror("[-]Error in reading file.");
+    cout << "- Reading file error.\n";
     exit(1);
   }
 
+  unsigned char buff[512];
   while(1)
   {
-    unsigned char buff[512];
     bzero(buff,512);
 
-    int nread = fread(buff,1,512,fp);
-
-    if( nread > 0 )
+    int bytesSent = fread(buff,1,512,ptr);
+    if(bytesSent > 0)
     {
-      write(client, buff, nread);
+      write(client, buff, bytesSent);
     }
 
-    if( nread < 512 )
+    if(bytesSent < 512)
     {
-      if( feof(fp) )
+      if(feof(ptr))
       {
-        printf("End of file\n");
+        cout << "- File pointer is at EOF.\n";
         break;
       }
-      if(ferror(fp))
+      if(ferror(ptr))
       {
-        printf("error reading");
+        cout << "- Reading file error.";
         break;
       }        
     }
