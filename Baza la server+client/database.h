@@ -532,7 +532,6 @@ string searchApps()
     cout << endl;
     
     return searchInfo;
-
 }
 
 string numberOfAppsFound(sqlite3* db, string sqlQuery)
