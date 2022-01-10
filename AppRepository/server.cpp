@@ -43,6 +43,14 @@ int main ()
   server.sin_family = AF_INET;	// Socket Family
   server.sin_addr.s_addr = htonl (INADDR_ANY); // any address
   server.sin_port = htons (PORT); // Connection port
+  
+  // Reusing the 
+  int enable = 1;
+  if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+  {
+    errorHandling("setsockopt(SO_REUSEADDR) failed.\n");
+    return 0;
+  }
 
   if (bind (sd, (struct sockaddr *) &server, sizeof (struct sockaddr)) == -1)
   {
