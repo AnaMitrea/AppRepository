@@ -44,7 +44,7 @@ int main ()
   server.sin_addr.s_addr = htonl (INADDR_ANY); // any address
   server.sin_port = htons (PORT); // Connection port
   
-  // Reusing the 
+  // Reusing the addr
   int enable = 1;
   if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
   {
