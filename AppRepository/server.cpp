@@ -44,13 +44,15 @@ int main ()
   server.sin_addr.s_addr = htonl (INADDR_ANY); // any address
   server.sin_port = htons (PORT); // Connection port
   
-  // Reusing the addr
+  /*
+  // Reusing the addr to temporary solve the socket problem of "Address already in user"
   int enable = 1;
   if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
   {
     errorHandling("setsockopt(SO_REUSEADDR) failed.\n");
     return 0;
   }
+  */
 
   if (bind (sd, (struct sockaddr *) &server, sizeof (struct sockaddr)) == -1)
   {
