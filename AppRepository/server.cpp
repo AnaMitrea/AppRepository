@@ -43,8 +43,7 @@ int main ()
   server.sin_family = AF_INET;	// Socket Family
   server.sin_addr.s_addr = htonl (INADDR_ANY); // any address
   server.sin_port = htons (PORT); // Connection port
-  
-  /*
+
   // Reusing the addr to temporary solve the socket problem of "Address already in use"
   int enable = 1;
   if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
@@ -52,7 +51,6 @@ int main ()
     errorHandling("setsockopt(SO_REUSEADDR) failed.\n");
     return 0;
   }
-  */
 
   if (bind (sd, (struct sockaddr *) &server, sizeof (struct sockaddr)) == -1)
   {
@@ -60,7 +58,7 @@ int main ()
     return 0;
   }
 
-  if (listen (sd, 5) == -1) // queue of 5 
+  if (listen (sd, 5) == -1) // max queue of 5 
   {
     errorHandling("[server] Error listen().\n");
     return 0;
