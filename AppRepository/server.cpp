@@ -45,7 +45,7 @@ int main ()
   server.sin_port = htons (PORT); // Connection port
   
   /*
-  // Reusing the addr to temporary solve the socket problem of "Address already in user"
+  // Reusing the addr to temporary solve the socket problem of "Address already in use"
   int enable = 1;
   if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
   {
