@@ -1,4 +1,4 @@
-# Tema-2-RC
+# Descriere App Repository
 
 https://profs.info.uaic.ro/~computernetworks/proiecte.php
 
