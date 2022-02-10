@@ -14,4 +14,3 @@ Redactarea raportului tehnic:
 - Detalii de implementare (cod relevant particular proiectului, care va fi documentat; scenarii de utilizare)
 - Concluzii (e.g. cum ar putea fi imbunatatita solutia propusa?)
 - Bibliografie
-
